@@ -1,0 +1,113 @@
+/*
+ * OFFROU 디자인 토큰
+ * - 메인 컬러는 아직 미확정 → --brand-* 값만 바꾸면 전체에 반영된다.
+ * - 다크모드: 시스템 설정을 따르며, <html data-theme="light|dark">로 강제할 수 있다.
+ */
+:root {
+  /* Brand (임시) */
+  --brand-primary: #5e8c7e;        /* 차분한 세이지 그린 */
+  --brand-primary-soft: #e3ece7;
+  --brand-accent: #e3a57a;         /* 해질녘 살구빛 */
+  --brand-accent-soft: #f6e6da;
+
+  /* Surface & text */
+  --color-bg: #f6f1e9;
+  --color-surface: #fffcf7;
+  --color-surface-pressed: #f1eadf;
+  --color-border: #e7dfd2;
+  --color-text: #2f2b27;
+  --color-text-muted: #7a7168;
+  --color-text-on-primary: #ffffff;
+  --color-selected-bg: var(--brand-primary-soft);
+  --color-selected-border: var(--brand-primary);
+  --color-nav-bg: rgba(255, 252, 247, 0.88);
+  --color-focus: var(--brand-primary);
+
+  /* REST 실행 화면 배경 */
+  --rest-sky: #dce8ee;
+  --rest-dusk: #f2dccd;
+  --rest-night: #dad7e6;
+  --rest-warm: #f3e5cd;
+
+  /* Typography */
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2rem;
+  --leading-tight: 1.3;
+  --leading-normal: 1.6;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Shape & depth */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 1px 2px rgba(47, 43, 39, 0.04), 0 6px 20px rgba(47, 43, 39, 0.05);
+
+  /* Layout */
+  --content-max: 560px;
+  --content-max-wide: 880px;
+  --nav-height: 68px;
+  --touch-min: 56px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 160ms;
+  --duration-base: 320ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --brand-primary: #8fbcad;
+    --brand-primary-soft: #2a3632;
+    --brand-accent: #e8b48f;
+    --brand-accent-soft: #3a2e27;
+    --color-bg: #1e1d22;
+    --color-surface: #28272d;
+    --color-surface-pressed: #312f36;
+    --color-border: #38363e;
+    --color-text: #f1ece4;
+    --color-text-muted: #a8a097;
+    --color-text-on-primary: #1e1d22;
+    --color-nav-bg: rgba(40, 39, 45, 0.88);
+    --rest-sky: #22303a;
+    --rest-dusk: #3a2d28;
+    --rest-night: #25233a;
+    --rest-warm: #38301f;
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+}
+
+:root[data-theme='dark'] {
+  --brand-primary: #8fbcad;
+  --brand-primary-soft: #2a3632;
+  --brand-accent: #e8b48f;
+  --brand-accent-soft: #3a2e27;
+  --color-bg: #1e1d22;
+  --color-surface: #28272d;
+  --color-surface-pressed: #312f36;
+  --color-border: #38363e;
+  --color-text: #f1ece4;
+  --color-text-muted: #a8a097;
+  --color-text-on-primary: #1e1d22;
+  --color-nav-bg: rgba(40, 39, 45, 0.88);
+  --rest-sky: #22303a;
+  --rest-dusk: #3a2d28;
+  --rest-night: #25233a;
+  --rest-warm: #38301f;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.18);
+}

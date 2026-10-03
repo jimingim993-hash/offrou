@@ -1,0 +1,34 @@
+.button {
+  min-height: var(--touch-min);
+  padding: 0 var(--space-6);
+  font-size: var(--text-md);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) var(--ease-out);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--brand-primary);
+  color: var(--color-text-on-primary);
+}
+
+.ghost {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.block {
+  width: 100%;
+}
