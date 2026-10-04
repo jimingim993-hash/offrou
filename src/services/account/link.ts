@@ -67,5 +67,13 @@ export const getBackup = () =>
 /** 사용자 기록만 비운다 (계정 연결·보관본·알림 설정·복구 보관함은 남김). 항상 backupLocalData 뒤에 부른다. */
 export const clearUserData = () =>
   resetAllData({
-    keep: [STORAGE_KEYS.account, STORAGE_KEYS.guestBackup, STORAGE_KEYS.guestBackupArchive, STORAGE_KEYS.notify, STORAGE_KEYS.recovery],
+    keep: [
+      STORAGE_KEYS.account,
+      STORAGE_KEYS.guestBackup,
+      STORAGE_KEYS.guestBackupArchive,
+      STORAGE_KEYS.notify,
+      STORAGE_KEYS.recovery,
+      STORAGE_KEYS.onboarding,
+      STORAGE_KEYS.supportSent,
+    ],
   });

@@ -1,4 +1,5 @@
 import type { RemoteStore } from '../sync/engine';
+import type { AdminStore, SupportStore } from '../support/types';
 
 /** 화면이 아는 사용자 정보는 이게 전부다 (이름·연락처 등은 받지 않는다) */
 export interface AuthUser {
@@ -35,6 +36,10 @@ export interface AccountBackend {
   remote: RemoteStore;
   /** "새로운 시간" 알림 구독 저장소 (서버에 알림 테이블이 준비된 백엔드만) */
   push?: PushStore;
+  /** 문의·오류 접수 (비회원도 가능, 16단계) */
+  support?: SupportStore;
+  /** 운영자 관리센터 — 권한은 서버(RLS·is_offrou_admin)가 판단한다 */
+  admin?: AdminStore;
 }
 
 export type NotifyFrequency = 'daily' | 'sometimes';

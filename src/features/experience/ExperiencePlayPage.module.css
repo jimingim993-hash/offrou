@@ -57,3 +57,10 @@
   font-weight: 700;
   color: var(--brand-primary);
 }
+
+/* 문제 알려주기 (눈에 띄지 않게) */
+.report {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}

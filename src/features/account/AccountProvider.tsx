@@ -7,6 +7,7 @@ import { getVersion, resetAllData, subscribe } from '@/services/storage';
 import { syncWithRemote } from '@/services/sync/engine';
 import { hasMeaningfulData, readLocalSnapshot } from '@/services/sync/snapshot';
 import { disableNotifications, getNotifySettings } from '@/pwa/notifications';
+import type { SupportStore } from '@/services/support/types';
 
 /**
  * 계정 상태. 로그인은 선택 기능이고, 어떤 상태에서도 OFFROU 자체는 계속 쓸 수 있다.
@@ -31,6 +32,8 @@ interface AccountContextValue {
   notice: AccountNotice;
   /** 알림 구독 저장소 (로그인 + 서버 준비 시에만) */
   pushStore: PushStore | null;
+  /** 문의 접수 (비회원도 가능, 서버 준비 시에만) */
+  supportStore: SupportStore | null;
   clearNotice(): void;
   signUp(email: string, password: string): Promise<SignUpResult>;
   signIn(email: string, password: string): Promise<void>;
@@ -189,6 +192,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       recovering,
       notice,
       pushStore: status === 'signedIn' ? (backend?.push ?? null) : null,
+      supportStore: backend?.support ?? null,
       clearNotice: () => setNotice(null),
 
       async signUp(email, password) {

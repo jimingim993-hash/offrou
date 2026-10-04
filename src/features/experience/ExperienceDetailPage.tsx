@@ -3,6 +3,8 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getExperience } from '@/services/experiences';
 import { hasRecord } from '@/services/records';
 import { noteViewed } from '@/services/activity';
+import { noteRecent } from '@/services/recent';
+import { ReportProblem } from '@/features/support/ReportProblem';
 import { ExperienceIntro } from '@/components/experience/ExperienceIntro';
 import { Button } from '@/components/ui/Button';
 import { playPath } from './paths';
@@ -16,7 +18,10 @@ export function ExperienceDetailPage() {
 
   // 최근 본 시간 (최대 5개, 이 기기에만)
   useEffect(() => {
-    if (experience) noteViewed(experience.id);
+    if (experience) {
+      noteViewed(experience.id);
+      noteRecent(experience.id);
+    }
   }, [experience]);
 
   if (!experience) return <Navigate to="/app/discover" replace />;
@@ -35,6 +40,9 @@ export function ExperienceDetailPage() {
         </Button>
       </ExperienceIntro>
       {visited && isStory && <p className={styles.hint}>다른 선택을 하면, 다른 하루가 될 수도 있어.</p>}
+      <div className={styles.report}>
+        <ReportProblem experience={experience} />
+      </div>
     </div>
   );
 }

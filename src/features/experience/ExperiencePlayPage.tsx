@@ -4,6 +4,9 @@ import { CATEGORIES } from '@/data/categories';
 import { getExperience } from '@/services/experiences';
 import { addRecord } from '@/services/records';
 import { noteStarted } from '@/services/activity';
+import { noteRecent } from '@/services/recent';
+import { ReportProblem } from '@/features/support/ReportProblem';
+import { clearCourseResume, saveCourseResume } from '@/services/resume';
 import { parseReadyParams } from '@/features/ready/readyParams';
 import { endCourseRun, recordCourseStep } from '@/services/courses';
 import { courseDonePath, courseNextPath, parseCourseParams } from '@/features/course/courseParams';
@@ -35,15 +38,26 @@ export function ExperiencePlayPage() {
     if (!experience || started.current) return;
     started.current = true;
     noteStarted(experience.id);
+    noteRecent(experience.id);
   }, [experience]);
+
+  const { course, step, runId } = parseCourseParams(params);
+  const inCourse =
+    experience && course && step !== undefined && runId && course.stepIds[step] === experience.id ? { course, step, runId } : null;
+
+  // 작은 코스 진행 중이면 지금 시간을 이어하기 지점으로 남긴다 (16단계)
+  const courseKey = inCourse ? `${inCourse.runId}:${inCourse.step}` : '';
+  useEffect(() => {
+    if (!inCourse) return;
+    const { course: c, step: s, runId: r } = inCourse;
+    saveCourseResume({ vibe: c.vibe, minutes: c.targetMinutes, stepIds: c.stepIds, step: s, runId: r });
+  }, [courseKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!experience) return <Navigate to="/app" replace />;
 
   const category = CATEGORIES.find((c) => c.id === experience.categoryId);
   const Runner = getRunner(experience);
 
-  const { course, step, runId } = parseCourseParams(params);
-  const inCourse = course && step !== undefined && runId && course.stepIds[step] === experience.id ? { course, step, runId } : null;
 
   const finish = (result: RunResult = {}) => {
     if (finished.current) return;
@@ -59,8 +73,10 @@ export function ExperiencePlayPage() {
       const { course, step, runId } = inCourse;
       recordCourseStep(runId, course, experience.id);
       if (step + 1 < course.stepIds.length) {
+        saveCourseResume({ vibe: course.vibe, minutes: course.targetMinutes, stepIds: course.stepIds, step: step + 1, runId });
         navigate(courseNextPath(course, step + 1, runId), { replace: true });
       } else {
+        clearCourseResume(runId);
         endCourseRun(runId, course);
         navigate(courseDonePath(course, runId), { replace: true });
       }
@@ -72,6 +88,7 @@ export function ExperiencePlayPage() {
   // 코스를 여기까지만 (지금 시간은 기록하지 않고, 이미 마친 시간은 그대로 남는다)
   const endCourse = () => {
     if (!inCourse) return;
+    clearCourseResume(inCourse.runId);
     endCourseRun(inCourse.runId, inCourse.course);
     navigate(courseDonePath(inCourse.course, inCourse.runId), { replace: true });
   };
@@ -103,6 +120,10 @@ export function ExperiencePlayPage() {
       <h1 className={styles.title}>{experience.title}</h1>
 
       <Runner experience={experience} onFinish={finish} />
+
+      <div className={styles.report}>
+        <ReportProblem experience={experience} />
+      </div>
 
       {exitOpen &&
         (inCourse ? (

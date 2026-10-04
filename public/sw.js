@@ -21,6 +21,7 @@ const CORE = [
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
+  '/robots.txt',
 ];
 const NAVIGATION_TIMEOUT_MS = 3500;
 const FONT_HOST = 'cdn.jsdelivr.net';

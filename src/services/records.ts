@@ -1,5 +1,6 @@
 import type { DurationId, Experience, MoodId, OffrouRecord } from '@/types/offrou';
 import { STORAGE_KEYS, readList, writeJson } from './storage';
+import { getContentVersion } from './experiences';
 
 /**
  * MY OFFROU 기록 저장소.
@@ -55,6 +56,7 @@ export function addRecord(experience: Experience, { moodId, durationId, endingTi
     ...(durationId && { durationId }),
     ...(endingTitle && { endingTitle }),
     ...(courseRunId && { courseRunId }),
+    contentVersion: getContentVersion(experience),
   };
   writeJson(STORAGE_KEYS.records, [...read(), record]);
   return record;

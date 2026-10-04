@@ -164,6 +164,11 @@ export interface Experience {
   solo?: boolean;
   /** 실행 방식. 없으면 guide */
   interaction?: Interaction;
+  /**
+   * 콘텐츠 버전 (없으면 1). 장면 구조·주요 단계·진행 방식이 바뀔 때만 올린다 (오탈자 수정은 그대로).
+   * id는 바꾸지 않는다 — 저장·기록은 id로 연결된다. 사용자 저장 구조 버전(storageVersion)과는 별개다.
+   */
+  version?: number;
 }
 
 /** MY에 쌓이는 경험 기록. 선택 내용 전체는 저장하지 않는다. */
@@ -184,6 +189,8 @@ export interface OffrouRecord {
   endingTitle?: string;
   /** 작은 코스 안에서 완료했다면 그 코스 진행 id (MY에서 코스 하나로 묶어 보여준다) */
   courseRunId?: string;
+  /** 완료할 때의 콘텐츠 버전 (16단계부터, 이전 기록에는 없다) */
+  contentVersion?: number;
 }
 
 /* ─── 개인화 (4단계) ─── */

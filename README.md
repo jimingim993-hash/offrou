@@ -119,6 +119,14 @@ public/          manifest.webmanifest, sw.js, icons/
 - 콘텐츠 id는 바꾸지 않는다 (기록·저장이 id로 연결). 과거 기록은 당시 제목·카테고리·시간을 함께 저장하므로 콘텐츠가 사라져도 MY에 남는다.
 - 서버 마이그레이션에는 `DROP TABLE`·`TRUNCATE`·조건 없는 `DELETE`를 쓰지 않는다 (테스트로 검사).
 
+## 출시 준비 (15~16단계)
+
+- 출시 전 점검·외부 설정·배포 후 확인은 **`RELEASE_CHECKLIST.md`**.
+- 이어하기(이야기·작은 코스), 최근 본 시간(MY 탭), 처음 사용 안내(한 번), 콘텐츠 버전(`version`, id는 그대로)은 이 기기에 저장된다. 저장 구조는 v2 마이그레이션으로 새 키만 추가된다.
+- 문의·문제 신고: `/app/support`, 내 문의 `/app/support/mine`, 콘텐츠 화면의 "문제 알려주기". 서버 구조는 `supabase/migrations/20261008…_offrou_support.sql`.
+- 운영자 관리센터: `/admin` (일반 화면에 링크 없음). 권한은 `offrou_admins` 테이블 + 서버 함수 `is_offrou_admin()` + RLS로만 판단한다. 최초 운영자 지정 방법은 체크리스트 3장.
+- 화면 오류가 나면 하얀 화면 대신 안내(오류 코드·HOME·문제 알려주기)가 뜬다 (`src/app/AppError.tsx`).
+
 ## 개인화 (이 기기 안에서만)
 
 - 저장 키는 모두 `offrou.` 접두사 (localStorage: records · feedback · saved · activity / sessionStorage: session).

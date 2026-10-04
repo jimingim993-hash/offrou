@@ -170,7 +170,8 @@ describe('실제 진행 · 분기', () => {
     expect(screen.getByRole('heading', { level: 2, name: '아침 시장' })).toBeInTheDocument();
 
     renderAt(play('exp-city-guide'));
-    await user.click(screen.getByRole('button', { name: '시작하기' }));
+    // 방금 진행이 남아 있으므로 (16단계 이어하기) 처음부터 다시
+    await user.click(screen.getByRole('button', { name: '처음부터' }));
     await user.click(screen.getByRole('button', { name: '언덕 위 공원' }));
     expect(screen.getByRole('heading', { level: 2, name: '언덕 위 공원' })).toBeInTheDocument();
   });

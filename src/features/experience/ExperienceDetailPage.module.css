@@ -8,3 +8,10 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
+
+/* 문제 알려주기 (눈에 띄지 않게) */
+.report {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}

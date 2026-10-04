@@ -128,7 +128,8 @@ describe('저장 구조 버전 · 마이그레이션', () => {
   it('처음 실행: 버전 표시만 추가하고 데이터는 바꾸지 않는다 · 두 번 실행해도 같다', () => {
     seedLegacy();
     const r1 = runStorageMigrations();
-    expect(r1).toMatchObject({ from: 0, to: CURRENT_STORAGE_VERSION, ok: true, changedKeys: [] });
+    // v2: 이미 쓰던 사람이므로 '처음 사용 안내 봤음' 키만 새로 생긴다 (기존 키는 그대로)
+    expect(r1).toMatchObject({ from: 0, to: CURRENT_STORAGE_VERSION, ok: true, changedKeys: [STORAGE_KEYS.onboarding] });
     expect(readStorageMeta()?.storageVersion).toBe(CURRENT_STORAGE_VERSION);
     const r2 = runStorageMigrations();
     expect(r2).toMatchObject({ from: CURRENT_STORAGE_VERSION, changedKeys: [] });
@@ -144,12 +145,12 @@ describe('저장 구조 버전 · 마이그레이션', () => {
       run: (data) => editJson(data, STORAGE_KEYS.records, (list) => (list as unknown[]).map((r) => fillDefaults(r, { source: 'local', title: '덮어쓰면 안 됨' }))),
     };
     const result = runStorageMigrations({ migrations: [{ to: 1, description: '', run: () => {} }, v2], target: v2.to });
-    expect(result).toMatchObject({ ok: true, from: 1, to: v2.to, changedKeys: [STORAGE_KEYS.records] });
+    expect(result).toMatchObject({ ok: true, from: CURRENT_STORAGE_VERSION, to: v2.to, changedKeys: [STORAGE_KEYS.records] });
     const records = JSON.parse(localStorage.getItem(STORAGE_KEYS.records)!);
     expect(records[0]).toMatchObject({ id: 'r1', title: '창밖 바라보기', moodId: 'rest', source: 'local' });
     expect(records[1]).toMatchObject({ id: 'r2', title: '동네 탐정', endingTitle: '사건 해결', source: 'local' });
     // 바꾼 키의 원본은 백업에 남는다
-    expect(JSON.parse(localStorage.getItem('offrou.migration-backup.v1')!).data[STORAGE_KEYS.records]).toBe(LEGACY[STORAGE_KEYS.records]);
+    expect(JSON.parse(localStorage.getItem(`offrou.migration-backup.v${CURRENT_STORAGE_VERSION}`)!).data[STORAGE_KEYS.records]).toBe(LEGACY[STORAGE_KEYS.records]);
     // 다른 키는 그대로
     expect(localStorage.getItem(STORAGE_KEYS.saved)).toBe(LEGACY[STORAGE_KEYS.saved]);
   });

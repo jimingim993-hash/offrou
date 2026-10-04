@@ -27,7 +27,35 @@ export const MIGRATIONS: Migration[] = [
     description: '저장 구조 버전 표시 시작 (데이터는 바꾸지 않는다)',
     run: () => {},
   },
+  {
+    to: 2,
+    description: '최근 본 OFFROU·처음 사용 안내 추가 (기존 값은 그대로, 새 키만 채운다)',
+    run: (data) => {
+      // 최근 본 목록: 예전 activity.recentViewed(id 목록)에서 시작 — 이미 있으면 건드리지 않는다
+      if (!data.has(STORAGE_KEYS.recentViewed)) {
+        const activity = parseOr(data.get(STORAGE_KEYS.activity));
+        const ids = isObject(activity) && Array.isArray(activity.recentViewed) ? activity.recentViewed.filter((x): x is string => typeof x === 'string') : [];
+        if (ids.length) data.set(STORAGE_KEYS.recentViewed, JSON.stringify(ids.slice(0, 20).map((id) => ({ id, viewedAt: MIGRATED_AT }))));
+      }
+      // 이미 OFFROU를 쓰던 사람에게는 처음 사용 안내를 다시 보여주지 않는다
+      const used = [STORAGE_KEYS.records, STORAGE_KEYS.saved, STORAGE_KEYS.activity, STORAGE_KEYS.savedCourses, STORAGE_KEYS.account].some((k) => data.has(k));
+      if (used && !data.has(STORAGE_KEYS.onboarding)) data.set(STORAGE_KEYS.onboarding, JSON.stringify({ seenAt: MIGRATED_AT, by: 'migration' }));
+    },
+  },
 ];
+
+/** 깨진 값이면 undefined (마이그레이션이 그 키를 건드리지 않게) */
+function parseOr(raw: string | undefined): unknown {
+  if (raw === undefined) return undefined;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
+/** 시각을 알 수 없는 옛 데이터에 붙이는 표시 */
+const MIGRATED_AT = '1970-01-01T00:00:00.000Z';
 
 export const CURRENT_STORAGE_VERSION = MIGRATIONS[MIGRATIONS.length - 1].to;
 

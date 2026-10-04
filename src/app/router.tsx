@@ -15,9 +15,13 @@ import { InstantPage } from '@/features/now/InstantPage';
 import { CoursePage } from '@/features/course/CoursePage';
 import { CourseDonePage, CourseNextPage } from '@/features/course/CourseStepPages';
 import { APP_BASE } from './paths';
+import { MySupportPage, SupportPage } from '@/features/support/SupportPage';
+import { AppError } from './AppError';
 
 // 공식 홈페이지는 따로 불러온다 → 서비스(/app) 코드와 섞이지 않는 별도 chunk
 const SitePage = lazy(() => import('@/features/site/SitePage').then((m) => ({ default: m.SitePage })));
+// 운영자 관리센터도 따로 불러온다 → 일반 사용자 화면 번들에 섞이지 않는다
+const AdminApp = lazy(() => import('@/features/admin/AdminApp').then((m) => ({ default: m.AdminApp })));
 
 /**
  * 6단계까지 쓰던 주소(/my, /discover/…, /account/reset#… 등)를 /app 아래로 옮긴다.
@@ -34,6 +38,7 @@ const LEGACY_PATHS = ['ready', 'discover/*', 'experience/*', 'my', 'account/*'];
 export const routes: RouteObject[] = [
   {
     path: '/',
+    errorElement: <AppError />,
     element: (
       <Suspense fallback={null}>
         <SitePage />
@@ -43,6 +48,7 @@ export const routes: RouteObject[] = [
   {
     path: APP_BASE,
     element: <AppShell />,
+    errorElement: <AppError />,
     children: [
       { index: true, element: <HomePage /> },
       { path: 'ready', element: <ReadyPage /> },
@@ -58,8 +64,20 @@ export const routes: RouteObject[] = [
       { path: 'my', element: <MyPage /> },
       { path: 'account', element: <AccountPage /> },
       { path: 'account/reset', element: <ResetPasswordPage /> },
+      { path: 'support', element: <SupportPage /> },
+      { path: 'support/mine', element: <MySupportPage /> },
       { path: '*', element: <Navigate to={APP_BASE} replace /> },
     ],
+  },
+  {
+    // 운영자 관리센터 — 권한은 서버(Supabase RLS·is_offrou_admin)가 판단한다. 일반 화면 어디에도 링크하지 않는다.
+    path: '/admin/*',
+    errorElement: <AppError />,
+    element: (
+      <Suspense fallback={null}>
+        <AdminApp />
+      </Suspense>
+    ),
   },
   ...LEGACY_PATHS.map((path) => ({ path, element: <LegacyRedirect /> })),
   { path: '*', element: <Navigate to="/" replace /> },

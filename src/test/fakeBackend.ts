@@ -14,6 +14,7 @@ import {
   type TasteRow,
 } from '@/services/account/supabaseRows';
 import type { AccountBackend, AuthEvent, AuthUser, PushSubscriptionInput } from '@/services/account/types';
+import type { AdminSupportRequest, SupportHistory, SupportNote } from '@/services/support/types';
 import { EMPTY_SNAPSHOT, type UserSnapshot } from '@/services/sync/snapshot';
 
 /**
@@ -51,6 +52,23 @@ export class FakeServer {
   pushSubs = new Map<string, PushSubscriptionInput & { userId: string }>();
   /** false면 알림 저장소가 없는 서버 (구버전·마이그레이션 전) */
   pushEnabled = true;
+  /** 문의 (서버 행). 운영자 지정은 admins에만 (SQL로 넣는 것을 흉내) */
+  supportRequests: (AdminSupportRequest & { client_key: string })[] = [];
+  supportNotes: SupportNote[] = [];
+  supportHistory: SupportHistory[] = [];
+  admins = new Set<string>();
+  /** false면 문의 테이블이 없는 서버 (마이그레이션 전) */
+  supportEnabled = true;
+  /** 접속 주소 대신 쓰는 값 (빈도 제한 흉내) */
+  clientKey = 'device-1';
+  now = () => new Date();
+  private reqSeq = 0;
+
+  nextRequestNumber() {
+    const d = this.now();
+    const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    return `OFF-${ymd}-${String(++this.reqSeq).padStart(6, '0')}`;
+  }
   private seq = 0;
 
   tablesFor(userId: string): UserTables {
@@ -102,6 +120,125 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
     },
   };
 
+  const isAdmin = () => {
+    const u = readSession();
+    return !!u && server.admins.has(u.id);
+  };
+  const SUPPORT_TYPES = ['bug', 'content', 'display', 'account', 'data', 'pwa', 'notification', 'howto', 'suggestion', 'other'];
+
+  const supportStore: AccountBackend['support'] = {
+    async submit(input) {
+      net();
+      const user = readSession();
+      // 서버 함수와 같은 검사 · 빈도 제한 (10분 5건)
+      if (!SUPPORT_TYPES.includes(input.type)) throw new AccountError('unknown', new Error('invalid type'));
+      if (!input.title.trim() || input.title.length > 100 || !input.message.trim() || input.message.length > 2000)
+        throw new AccountError('unknown', new Error('invalid length'));
+      const since = server.now().getTime() - 10 * 60 * 1000;
+      const recent = server.supportRequests.filter(
+        (r) => ((user && r.user_id === user.id) || r.client_key === server.clientKey) && new Date(r.created_at).getTime() > since,
+      );
+      if (recent.length >= 5) throw new AccountError('rate_limited');
+      const at = server.now().toISOString();
+      const row = {
+        id: `req-${server.supportRequests.length + 1}`,
+        request_number: server.nextRequestNumber(),
+        user_id: user?.id ?? null,
+        email: input.email?.trim() || null,
+        type: input.type,
+        title: input.title.trim(),
+        message: input.message.trim(),
+        status: 'new' as const,
+        priority: 'normal' as const,
+        reply: null,
+        content_id: input.info.content_id ?? null,
+        content_version: input.info.content_version ?? null,
+        category: input.info.category ?? null,
+        report_reason: input.info.report_reason ?? null,
+        error_code: input.info.error_code ?? null,
+        app_version: input.info.app_version,
+        route: input.info.route,
+        browser: input.info.browser,
+        os: input.info.os,
+        is_pwa: input.info.is_pwa,
+        screen: input.info.screen,
+        is_guest: !user,
+        created_at: at,
+        updated_at: at,
+        client_key: server.clientKey,
+      };
+      server.supportRequests.push(row);
+      return { requestNumber: row.request_number };
+    },
+    async listMine() {
+      net();
+      const user = requireSession();
+      // RLS: 자기 문의만
+      return server.supportRequests
+        .filter((r) => r.user_id === user.id)
+        .map((r) => ({ requestNumber: r.request_number, title: r.title, type: r.type, status: r.status, reply: r.reply, createdAt: r.created_at, updatedAt: r.updated_at }));
+    },
+  };
+
+  /** RLS 흉내: 운영자만 전체 조회·수정 */
+  const visible = () => {
+    const u = readSession();
+    if (!u) throw new AccountError('session_expired');
+    return server.supportRequests.filter((r) => isAdmin() || r.user_id === u.id);
+  };
+  const strip = (r: AdminSupportRequest & { client_key: string }): AdminSupportRequest => {
+    const { client_key: _c, ...rest } = r;
+    void _c;
+    return rest;
+  };
+
+  const adminStore: AccountBackend['admin'] = {
+    async isAdmin() {
+      net();
+      return isAdmin();
+    },
+    async list(filter = {}) {
+      net();
+      const q = filter.q?.trim().toLowerCase();
+      return visible()
+        .filter((r) => (!filter.status || r.status === filter.status) && (!filter.type || r.type === filter.type) && (!filter.priority || r.priority === filter.priority))
+        .filter((r) => !q || r.request_number.toLowerCase().includes(q) || r.title.toLowerCase().includes(q))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .map(strip);
+    },
+    async get(id) {
+      net();
+      const r = visible().find((x) => x.id === id);
+      return r ? strip(r) : null;
+    },
+    async update(id, patch) {
+      net();
+      requireSession();
+      const r = server.supportRequests.find((x) => x.id === id);
+      if (!r || !isAdmin()) throw new AccountError('session_expired'); // RLS: 0행
+      if (patch.status && patch.status !== r.status) {
+        server.supportHistory.push({ id: `h-${server.supportHistory.length + 1}`, request_id: id, previous_status: r.status, new_status: patch.status, changed_by: readSession()!.id, created_at: server.now().toISOString() });
+      }
+      Object.assign(r, patch, { updated_at: server.now().toISOString() });
+    },
+    async notes(id) {
+      net();
+      requireSession();
+      return isAdmin() ? server.supportNotes.filter((n) => n.request_id === id) : [];
+    },
+    async addNote(id, note) {
+      net();
+      const u = requireSession();
+      if (!isAdmin()) throw new AccountError('unknown', new Error('RLS: not admin'));
+      server.supportNotes.push({ id: `n-${server.supportNotes.length + 1}`, request_id: id, admin_user_id: u.id, note, created_at: server.now().toISOString() });
+    },
+    async history(id) {
+      net();
+      requireSession();
+      return isAdmin() ? server.supportHistory.filter((h) => h.request_id === id) : [];
+    },
+  };
+
   const listeners = new Set<(u: AuthUser | null, e: AuthEvent) => void>();
 
   const readSession = (): AuthUser | null => {
@@ -136,6 +273,14 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
 
     get push() {
       return server.pushEnabled ? pushStore : undefined;
+    },
+
+    get support() {
+      return server.supportEnabled ? supportStore : undefined;
+    },
+
+    get admin() {
+      return server.supportEnabled ? adminStore : undefined;
     },
 
     async getUser() {
@@ -192,6 +337,7 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
       for (const [email, u] of server.users) if (u.id === session.id) server.users.delete(email);
       server.tables.delete(session.id); // on delete cascade
       for (const [endpoint, sub] of server.pushSubs) if (sub.userId === session.id) server.pushSubs.delete(endpoint);
+      for (const r of server.supportRequests) if (r.user_id === session.id) r.user_id = null;
       setSession(null, 'signed_out');
     },
 

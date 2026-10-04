@@ -9,6 +9,7 @@ import { Chip } from '@/components/ui/Chip';
 import { Button } from '@/components/ui/Button';
 import { buildReadyPath } from '@/features/ready/readyParams';
 import { TodayOffrou } from './TodayOffrou';
+import { Onboarding, ResumeCard } from './HomeNotices';
 import styles from './HomePage.module.css';
 
 /**
@@ -20,6 +21,7 @@ export function HomePage() {
   const [mood, setMood] = useState<MoodId | null>(null);
   const [duration, setDuration] = useState<DurationId | null>(null);
   const timeSectionRef = useRef<HTMLElement>(null);
+  const moodRef = useRef<HTMLHeadingElement>(null);
 
   // 상태를 처음 고르면 시간 선택 영역으로 부드럽게 이동
   const hasMood = mood !== null;
@@ -39,6 +41,9 @@ export function HomePage() {
         <h1 className={styles.title}>오늘은 어떤 시간을 보내볼까?</h1>
       </header>
 
+      <Onboarding onStart={() => moodRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })} />
+      <ResumeCard />
+
       <section aria-labelledby="now-heading" className={styles.card}>
         <h2 id="now-heading" className={styles.cardTitle}>
           <span aria-hidden="true">⚡ </span>지금 딱 하나
@@ -53,7 +58,7 @@ export function HomePage() {
         <h2 id="fit-heading" className={styles.sectionTitle}>
           나에게 맞춰서
         </h2>
-        <h3 id="mood-heading" className={styles.question}>
+        <h3 id="mood-heading" ref={moodRef} className={styles.question}>
           지금 어떤 시간이 필요해?
         </h3>
         <div className={styles.moodGrid} role="group" aria-labelledby="mood-heading">

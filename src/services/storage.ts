@@ -34,6 +34,16 @@ export const STORAGE_KEYS = {
   meta: 'offrou.meta.v1',
   /** 읽지 못한(깨진·알 수 없는) 원본 보관함 — 자동으로 지우지 않는다 */
   recovery: 'offrou.recovery.v1',
+  /** 하던 이야기·작은 코스 이어하기 (이 기기에만) */
+  resume: 'offrou.resume.v1',
+  /** 최근 본 OFFROU (id·본 시각, 최대 20개) */
+  recentViewed: 'offrou.recent-viewed.v1',
+  /** 처음 사용 안내를 봤는지 */
+  onboarding: 'offrou.onboarding.v1',
+  /** 이 기기에서 보낸 문의 접수번호 (비회원도 번호를 다시 볼 수 있게) */
+  supportSent: 'offrou.support-sent.v1',
+  /** 화면 오류 기록 (코드·버전·경로만, 최근 5개) */
+  errorLog: 'offrou.error-log.v1',
   /** sessionStorage: 지금 추천 세션에서 이미 보여준 경험 */
   session: 'offrou.session.v1',
 } as const;

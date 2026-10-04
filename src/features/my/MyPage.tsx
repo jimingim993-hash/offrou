@@ -10,6 +10,7 @@ import { RecordList } from './RecordList';
 import { SavedList } from './SavedList';
 import { ResetData } from './ResetData';
 import { AppSettings } from './AppSettings';
+import { RecentViewed } from './RecentViewed';
 import { AccountCard } from '@/features/account/AccountCard';
 import styles from './MyPage.module.css';
 
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'records', label: '지나온 시간' },
   { id: 'saved', label: '저장한 시간' },
   { id: 'courses', label: '저장한 코스' },
+  { id: 'recent', label: '최근 본 시간' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -60,11 +62,17 @@ export function MyPage() {
         {tab === 'records' && <RecordList records={records} runs={getCourseRunsRaw()} />}
         {tab === 'saved' && <SavedList saved={saved} />}
         {tab === 'courses' && <SavedCourseList courses={savedCourses} />}
+        {tab === 'recent' && <RecentViewed />}
       </div>
 
       <AppSettings />
 
       <ResetData />
+
+      <nav className={styles.support} aria-label="도움말">
+        <Link to="/app/support">문의 및 문제 신고</Link>
+        <Link to="/app/support/mine">내 문의</Link>
+      </nav>
 
       {/* 공식 홈페이지로 가는 작은 진입점 (서비스 사용 중에는 눈에 띄지 않게) */}
       <p className={styles.about}>

@@ -7,6 +7,8 @@ import path from 'node:path';
 import { injectSeoTags } from './seo-meta';
 import { injectServiceWorkerBuild, precacheFiles } from './pwa-build';
 
+const pkg = JSON.parse(fs.readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+
 /** 빌드가 끝나면 dist/sw.js에 미리 저장할 파일 목록과 버전을 넣는다 (오프라인 실행·안전한 업데이트용) */
 const serviceWorkerPrecache = (): Plugin => ({
   name: 'offrou-sw-precache',
@@ -30,6 +32,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
     plugins: [react(), seoMeta(env), serviceWorkerPrecache()],
+    define: { __APP_VERSION__: JSON.stringify(pkg.version) },
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

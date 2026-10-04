@@ -12,6 +12,7 @@ import {
   type TasteRow,
 } from './supabaseRows';
 import type { AccountBackend, AuthEvent, AuthUser } from './types';
+import type { AdminSupportRequest, SupportHistory, SupportNote } from '../support/types';
 
 /**
  * Supabase 구현.
@@ -192,6 +193,95 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
           if (isMissingSchema(r.error)) warnMissingSchema();
           else fail(r.error);
         }
+      },
+    },
+
+    support: {
+      async submit(input) {
+        // 비회원(anon)도 부를 수 있는 서버 함수. 길이·종류 검사와 빈도 제한은 서버가 한다.
+        const { data, error } = await supabase.rpc('submit_support_request', {
+          p_type: input.type,
+          p_title: input.title,
+          p_message: input.message,
+          p_email: input.email ?? null,
+          p_info: input.info,
+        });
+        if (error) {
+          if (/rate_limited/.test(error.message ?? '')) throw new AccountError('rate_limited', error);
+          fail(error);
+        }
+        return { requestNumber: String(data) };
+      },
+      async listMine() {
+        const userId = await requireUserId();
+        // RLS가 자기 문의만 돌려준다 (운영자라도 여기서는 자기 것만 고른다)
+        const { data, error } = await supabase
+          .from(TABLES.supportRequests)
+          .select('request_number, title, type, status, reply, created_at, updated_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+        if (error) fail(error);
+        return (data ?? []).map((r) => ({
+          requestNumber: r.request_number,
+          title: r.title,
+          type: r.type,
+          status: r.status,
+          reply: r.reply,
+          createdAt: r.created_at,
+          updatedAt: r.updated_at,
+        }));
+      },
+    },
+
+    admin: {
+      async isAdmin() {
+        const { data: session } = await supabase.auth.getSession();
+        if (!session.session) return false;
+        const { data, error } = await supabase.rpc('is_offrou_admin');
+        if (error) fail(error);
+        return data === true;
+      },
+      async list(filter = {}) {
+        await requireUserId();
+        let q = supabase.from(TABLES.supportRequests).select('*').order('created_at', { ascending: false }).limit(500);
+        if (filter.status) q = q.eq('status', filter.status);
+        if (filter.type) q = q.eq('type', filter.type);
+        if (filter.priority) q = q.eq('priority', filter.priority);
+        const term = filter.q?.trim().replace(/[%,()]/g, '');
+        if (term) q = q.or(`request_number.ilike.%${term}%,title.ilike.%${term}%`);
+        const { data, error } = await q;
+        if (error) fail(error);
+        return (data ?? []) as AdminSupportRequest[];
+      },
+      async get(id) {
+        await requireUserId();
+        const { data, error } = await supabase.from(TABLES.supportRequests).select('*').eq('id', id).maybeSingle();
+        if (error) fail(error);
+        return (data ?? null) as AdminSupportRequest | null;
+      },
+      async update(id, patch) {
+        await requireUserId();
+        // RLS: 운영자만 수정된다. 운영자가 아니면 0행이 바뀌므로 오류로 알린다.
+        const { data, error } = await supabase.from(TABLES.supportRequests).update(patch).eq('id', id).select('id');
+        if (error) fail(error);
+        if (!data?.length) throw new AccountError('session_expired');
+      },
+      async notes(id) {
+        await requireUserId();
+        const { data, error } = await supabase.from(TABLES.supportNotes).select('*').eq('request_id', id).order('created_at');
+        if (error) fail(error);
+        return (data ?? []) as SupportNote[];
+      },
+      async addNote(id, note) {
+        const userId = await requireUserId();
+        const { error } = await supabase.from(TABLES.supportNotes).insert({ request_id: id, admin_user_id: userId, note });
+        if (error) fail(error);
+      },
+      async history(id) {
+        await requireUserId();
+        const { data, error } = await supabase.from(TABLES.supportHistory).select('*').eq('request_id', id).order('created_at');
+        if (error) fail(error);
+        return (data ?? []) as SupportHistory[];
       },
     },
 

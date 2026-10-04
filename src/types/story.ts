@@ -52,4 +52,6 @@ export interface InteractiveStory {
   endings: StoryEnding[];
   /** 결말 메시지가 없을 때 쓰는 공통 완료 메시지 */
   completionMessage: string;
+  /** 이야기 버전 (없으면 1). 장면 구조가 바뀌면 올린다 → 이어하기 호환성 판단에 쓴다 */
+  version?: number;
 }

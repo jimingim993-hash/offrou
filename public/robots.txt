@@ -1,0 +1,5 @@
+# OFFROU
+# 운영자 관리센터는 검색에 노출하지 않는다 (접근 권한은 서버가 따로 검사한다)
+User-agent: *
+Allow: /
+Disallow: /admin

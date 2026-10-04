@@ -56,6 +56,9 @@ export const TABLES = {
   courseRuns: 'offrou_course_runs',
   savedCourses: 'offrou_saved_courses',
   pushSubscriptions: 'offrou_push_subscriptions',
+  supportRequests: 'offrou_support_requests',
+  supportNotes: 'offrou_support_notes',
+  supportHistory: 'offrou_support_history',
 } as const;
 
 export interface CourseRunRow {
