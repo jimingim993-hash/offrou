@@ -206,15 +206,16 @@ describe('카테고리별 실행 화면', () => {
 
   it('PLAY: 할 일을 하나씩 건네고 마지막 대답으로 완료', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/app/experience/play-color-hunt/play');
-    expect(screen.getByText(/지금 주변에서 (파란색|노란색|초록색|빨간색|하얀색) 물건 5개를 찾아봐\./)).toBeInTheDocument();
+    // (색깔 찾기는 10단계에서 실행형 PLAY가 됐다 → 할 일 방식은 손 그림자 놀이로 확인한다)
+    const router = renderAt('/app/experience/play-shadow-puppets/play');
+    expect(screen.getByText('불을 조금 낮추고, 벽 쪽으로 불빛 하나를 비춰.')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '1 / 3' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '찾았어' }));
-    expect(screen.getByText('이번엔 그중 가장 마음에 드는 하나를 골라봐.')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: '골랐어' }));
-    await user.click(screen.getByRole('button', { name: '생각해봤어' }));
-    expect(router.state.location.pathname).toBe('/app/experience/play-color-hunt/done');
+    await user.click(screen.getByRole('button', { name: '비췄어' }));
+    expect(screen.getByText(/손으로 (강아지|새|토끼|달팽이|악어) 그림자를 만들어봐\./)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '만들었어' }));
+    await user.click(screen.getByRole('button', { name: '말해봤어' }));
+    expect(router.state.location.pathname).toBe('/app/experience/play-shadow-puppets/done');
   });
 
   it('HOBBY: 오늘의 주제와 준비물을 보여주고 바로 시작', () => {

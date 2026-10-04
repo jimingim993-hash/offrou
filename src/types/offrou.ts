@@ -50,6 +50,19 @@ export type CostLevel = 'free' | 'low';
 /** REST 실행 화면의 배경 분위기 */
 export type RestTone = 'sky' | 'dusk' | 'night' | 'warm';
 
+/** 실행형 PLAY 프로그램 id (src/data/play/programs.ts) */
+export type PlayProgramId =
+  | 'three-words'
+  | 'small-choice'
+  | 'color-find'
+  | 'one-minute-doodle'
+  | 'photo-mission'
+  | 'observe-30'
+  | 'random-question'
+  | 'memory-5s'
+  | 'emoji-story'
+  | 'sound-find';
+
 /** PLAY 실행 화면의 한 단계: 할 일 한 문장 + 누르면 다음으로 가는 짧은 대답 */
 export interface PlayPrompt {
   /** {변수} 자리는 vars에서 하나를 골라 채운다 */
@@ -64,13 +77,15 @@ export interface PlayPrompt {
  * - prompts: 한 번에 하나씩 할 일을 건네는 짧은 상호작용 (PLAY)
  * - focus: 오늘의 주제 하나를 건네고 바로 시작 (HOBBY)
  * - story: 장면·선택지로 진행하는 인터랙티브 이야기 (EXPERIENCE)
+ * - play: OFFROU 안에서 바로 하는 실행형 놀이 (PLAY, 10단계). 프로그램 데이터는 src/data/play
  */
 export type Interaction =
   | { type: 'guide' }
   | { type: 'rest'; prompt: string; tone: RestTone; /** 천천히 하나씩 보여줄 짧은 문장 */ lines?: string[] }
   | { type: 'prompts'; prompts: PlayPrompt[]; vars?: Record<string, string[]> }
   | { type: 'focus'; label: string; subjects: string[] }
-  | { type: 'story'; storyId: string };
+  | { type: 'story'; storyId: string }
+  | { type: 'play'; program: PlayProgramId };
 
 export type InteractionType = Interaction['type'];
 

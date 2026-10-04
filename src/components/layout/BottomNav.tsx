@@ -2,9 +2,9 @@ import { NavLink } from 'react-router-dom';
 import { NAV_ITEMS } from '@/app/navigation';
 import styles from './BottomNav.module.css';
 
-export function BottomNav() {
+export function BottomNav({ typing = false }: { typing?: boolean }) {
   return (
-    <nav className={styles.nav} aria-label="주요 메뉴">
+    <nav className={`${styles.nav} ${typing ? styles.typing : ''}`} aria-label="주요 메뉴" data-typing={typing || undefined}>
       <ul className={styles.list}>
         {NAV_ITEMS.map(({ to, label, Icon, end }) => (
           <li key={to}>

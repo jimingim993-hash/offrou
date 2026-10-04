@@ -2,10 +2,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { isBackendConfigured, loadBackend } from '@/services/account/backend';
 import { AccountError, isNetworkError } from '@/services/account/errors';
 import { backupLocalData, clearLink, clearUserData, getLink, markSynced, setLink } from '@/services/account/link';
-import type { AccountBackend, AuthEvent, AuthUser, SignUpResult } from '@/services/account/types';
+import type { AccountBackend, AuthEvent, AuthUser, PushStore, SignUpResult } from '@/services/account/types';
 import { getVersion, resetAllData, subscribe } from '@/services/storage';
 import { syncWithRemote } from '@/services/sync/engine';
 import { hasMeaningfulData, readLocalSnapshot } from '@/services/sync/snapshot';
+import { disableNotifications, getNotifySettings } from '@/pwa/notifications';
 
 /**
  * 계정 상태. 로그인은 선택 기능이고, 어떤 상태에서도 OFFROU 자체는 계속 쓸 수 있다.
@@ -28,6 +29,8 @@ interface AccountContextValue {
   /** 비밀번호 재설정 링크로 들어온 상태 */
   recovering: boolean;
   notice: AccountNotice;
+  /** 알림 구독 저장소 (로그인 + 서버 준비 시에만) */
+  pushStore: PushStore | null;
   clearNotice(): void;
   signUp(email: string, password: string): Promise<SignUpResult>;
   signIn(email: string, password: string): Promise<void>;
@@ -185,6 +188,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       pendingLink,
       recovering,
       notice,
+      pushStore: status === 'signedIn' ? (backend?.push ?? null) : null,
       clearNotice: () => setNotice(null),
 
       async signUp(email, password) {
@@ -205,6 +209,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         if (status === 'signedIn' && !pendingLink) await runSync(b);
         const unsynced = getVersion() > syncedVersion.current;
         if (clearLocal && unsynced && !pendingLink) throw new AccountError('network');
+        // 로그아웃한 기기로 계정 알림이 계속 오지 않게 이 기기의 알림을 끈다
+        if (getNotifySettings().enabled) await disableNotifications({ store: b.push });
         await b.signOut();
         if (clearLocal) resetAllData();
         applyUser(b, null, 'signed_out');
@@ -242,6 +248,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       async deleteAccount() {
         const b = requireBackend();
         await b.deleteAccount();
+        // 서버 구독은 계정과 함께 지워졌다. 이 기기의 알림 설정·구독도 끈다
+        if (getNotifySettings().enabled) await disableNotifications();
         // 이 기기에 남은 기록은 비회원 기록으로 남는다 (따로 "이 기기의 기록 초기화"로 지울 수 있음)
         clearLink();
         applyUser(b, null, 'signed_out');

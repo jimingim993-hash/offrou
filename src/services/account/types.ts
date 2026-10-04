@@ -33,4 +33,25 @@ export interface AccountBackend {
   /** 계정과 서버의 개인 기록 삭제 (서버 측 함수로 처리) */
   deleteAccount(): Promise<void>;
   remote: RemoteStore;
+  /** "새로운 시간" 알림 구독 저장소 (서버에 알림 테이블이 준비된 백엔드만) */
+  push?: PushStore;
+}
+
+export type NotifyFrequency = 'daily' | 'sometimes';
+
+/** 알림 구독 한 건. 브라우저가 준 공개 구독 정보 + 사용자가 고른 시간만 담는다 */
+export interface PushSubscriptionInput {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  /** 'HH:MM' (사용자 기기 시간대 기준) */
+  time: string;
+  frequency: NotifyFrequency;
+  /** IANA 시간대 (예: Asia/Seoul) */
+  timezone: string;
+}
+
+export interface PushStore {
+  save(subscription: PushSubscriptionInput): Promise<void>;
+  remove(endpoint: string): Promise<void>;
 }

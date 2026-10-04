@@ -34,6 +34,10 @@ async function completeCurrent(user: User, router: ReturnType<typeof renderAt>) 
       if (scene.isEnding) break;
       await user.click(screen.getByRole('button', { name: scene.choices?.[0].label ?? '다음' }));
     }
+  } else if (e.interaction?.type === 'play') {
+    // 실행형 PLAY는 언제든 '여기까지만 할래'로 마칠 수 있다 (프로그램별 진행은 stage10 테스트)
+    await user.click(screen.getByRole('button', { name: '여기까지만 할래' }));
+    return;
   } else if (e.interaction?.type === 'prompts') {
     for (const p of e.interaction.prompts.slice(0, -1)) await user.click(screen.getByRole('button', { name: p.action }));
     await user.click(screen.getByRole('button', { name: e.interaction.prompts.at(-1)!.action }));
@@ -253,13 +257,15 @@ describe('흐름 C: 작은 OFFROU 코스', () => {
 describe('PLAY · HOBBY · REST 실행 화면 보완', () => {
   it('PLAY: 랜덤 값이 마음에 안 들면 "다른 걸로 바꿔줘"', async () => {
     const user = userEvent.setup();
-    renderAt('/app/experience/play-color-hunt/play');
-    const text = () => screen.getByText(/물건 5개를 찾아봐/).textContent;
+    // (색깔 찾기는 10단계에서 실행형 PLAY가 됐다 → 랜덤 값이 있는 할 일 방식은 반대 손으로 쓰기로 확인)
+    renderAt('/app/experience/play-left-hand/play');
+    await user.click(screen.getByRole('button', { name: '써봤어' }));
+    const text = () => screen.getByText(/같은 손으로 .+ 하나를 그려봐/).textContent;
     const before = text();
     await user.click(screen.getByRole('button', { name: /다른 걸로 바꿔줘/ }));
     expect(text()).not.toBe(before);
     // 랜덤 값이 없는 다음 단계엔 버튼이 없다
-    await user.click(screen.getByRole('button', { name: '찾았어' }));
+    await user.click(screen.getByRole('button', { name: '그렸어' }));
     expect(screen.queryByRole('button', { name: /다른 걸로 바꿔줘/ })).not.toBeInTheDocument();
   });
 

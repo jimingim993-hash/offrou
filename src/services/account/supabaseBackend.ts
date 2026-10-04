@@ -144,7 +144,10 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
           supabase.from(TABLES.courseRuns).select('*'),
           supabase.from(TABLES.savedCourses).select('*'),
         ]);
-        for (const r of [c, s, f, t, cr, sc]) if (r.error) fail(r.error);
+        for (const r of [c, s, f, t]) if (r.error) fail(r.error);
+        // 코스 테이블(8단계 마이그레이션)이 아직 없으면 코스만 빼고 동기화한다 → 코스 기록은 이 기기에 남는다
+        for (const r of [cr, sc]) if (r.error && !isMissingSchema(r.error)) fail(r.error);
+        if ([cr, sc].some((r) => r.error)) warnMissingSchema();
         return rowsToSnapshot({
           completions: (c.data ?? []) as CompletionRow[],
           saved: (s.data ?? []) as SavedRow[],
@@ -158,16 +161,82 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
       async push(changes) {
         const userId = await requireUserId();
         const rows = pushToRows(userId, changes);
-        const ops = [];
-        if (rows.completions.length)
-          ops.push(supabase.from(TABLES.completions).upsert(rows.completions, { onConflict: 'user_id,id', ignoreDuplicates: true }));
-        if (rows.saved.length) ops.push(supabase.from(TABLES.saved).upsert(rows.saved, { onConflict: 'user_id,experience_id' }));
-        if (rows.feedback.length) ops.push(supabase.from(TABLES.feedback).upsert(rows.feedback, { onConflict: 'user_id,record_id' }));
-        if (rows.taste) ops.push(supabase.from(TABLES.taste).upsert(rows.taste, { onConflict: 'user_id' }));
-        if (rows.courseRuns.length) ops.push(supabase.from(TABLES.courseRuns).upsert(rows.courseRuns, { onConflict: 'user_id,id' }));
-        if (rows.savedCourses.length) ops.push(supabase.from(TABLES.savedCourses).upsert(rows.savedCourses, { onConflict: 'user_id,id' }));
-        for (const r of await Promise.all(ops)) if (r.error) fail(r.error);
+        const upsertCompletions = async () => {
+          const opts = { onConflict: 'user_id,id', ignoreDuplicates: true };
+          let completions: Record<string, unknown>[] = rows.completions.map((r) => ({ ...r }));
+          let result = await supabase.from(TABLES.completions).upsert(completions, opts);
+          // 실행 방식 'play'를 모르는 서버(10단계 마이그레이션 전) → 그 기록의 kind만 비워서 다시 올린다
+          if (result.error && isKindRejected(result.error)) {
+            warnMissingSchema();
+            completions = completions.map((r) => (r.kind === 'play' ? { ...r, kind: null } : r));
+            result = await supabase.from(TABLES.completions).upsert(completions, opts);
+          }
+          if (!result.error || !isMissingSchema(result.error)) return result;
+          // course_run_id 열이 아직 없는 서버(8단계 마이그레이션 전) → 그 열만 빼고 다시 올린다
+          warnMissingSchema();
+          const legacy = completions.map(({ course_run_id: _omit, ...rest }) => rest);
+          return supabase.from(TABLES.completions).upsert(legacy, opts);
+        };
+        const required = [];
+        if (rows.completions.length) required.push(upsertCompletions());
+        if (rows.saved.length) required.push(supabase.from(TABLES.saved).upsert(rows.saved, { onConflict: 'user_id,experience_id' }));
+        if (rows.feedback.length) required.push(supabase.from(TABLES.feedback).upsert(rows.feedback, { onConflict: 'user_id,record_id' }));
+        if (rows.taste) required.push(supabase.from(TABLES.taste).upsert(rows.taste, { onConflict: 'user_id' }));
+        const courses = [];
+        if (rows.courseRuns.length) courses.push(supabase.from(TABLES.courseRuns).upsert(rows.courseRuns, { onConflict: 'user_id,id' }));
+        if (rows.savedCourses.length) courses.push(supabase.from(TABLES.savedCourses).upsert(rows.savedCourses, { onConflict: 'user_id,id' }));
+        const [requiredResults, courseResults] = await Promise.all([Promise.all(required), Promise.all(courses)]);
+        for (const r of requiredResults) if (r.error) fail(r.error);
+        for (const r of courseResults) {
+          if (!r.error) continue;
+          if (isMissingSchema(r.error)) warnMissingSchema();
+          else fail(r.error);
+        }
+      },
+    },
+
+    push: {
+      async save(sub) {
+        await requireUserId();
+        // 같은 브라우저 구독이 다른 계정에 남아 있으면 서버 함수가 정리한 뒤 이 계정으로 저장한다
+        const { error } = await supabase.rpc('save_push_subscription', {
+          p_endpoint: sub.endpoint,
+          p_p256dh: sub.p256dh,
+          p_auth: sub.auth,
+          p_time: sub.time,
+          p_frequency: sub.frequency,
+          p_timezone: sub.timezone,
+        });
+        if (error) fail(error);
+      },
+
+      async remove(endpoint) {
+        await requireUserId();
+        // RLS로 자기 구독만 지워진다
+        const { error } = await supabase.from(TABLES.pushSubscriptions).delete().eq('endpoint', endpoint);
+        if (error) fail(error);
       },
     },
   };
 }
+
+/** 마이그레이션이 아직 실행되지 않아 테이블·열이 없을 때의 오류 */
+export function isMissingSchema(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null;
+  if (!e) return false;
+  if (e.code && ['42P01', 'PGRST205', '42703', 'PGRST204'].includes(e.code)) return true;
+  return /relation .* does not exist|could not find the .*(table|column)/i.test(e.message ?? '');
+}
+
+/** 완료 기록의 kind 검사 제약(offrou_completions_kind_check) 위반 */
+export function isKindRejected(error: unknown): boolean {
+  const e = error as { code?: string; message?: string } | null;
+  return !!e && e.code === '23514' && /kind_check/.test(e.message ?? '');
+}
+
+let warned = false;
+const warnMissingSchema = () => {
+  if (warned) return;
+  warned = true;
+  console.warn('[OFFROU] 서버 테이블이 최신이 아니야. supabase/migrations/ 의 마이그레이션을 이름 순서대로 실행해줘.');
+};

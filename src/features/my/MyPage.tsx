@@ -9,6 +9,7 @@ import { MyOverview } from './MyOverview';
 import { RecordList } from './RecordList';
 import { SavedList } from './SavedList';
 import { ResetData } from './ResetData';
+import { AppSettings } from './AppSettings';
 import { AccountCard } from '@/features/account/AccountCard';
 import styles from './MyPage.module.css';
 
@@ -60,6 +61,8 @@ export function MyPage() {
         {tab === 'saved' && <SavedList saved={saved} />}
         {tab === 'courses' && <SavedCourseList courses={savedCourses} />}
       </div>
+
+      <AppSettings />
 
       <ResetData />
 

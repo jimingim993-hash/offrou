@@ -25,7 +25,7 @@ const renderAt = (path: string) => {
 /** 홈페이지는 따로 불러오므로(lazy) 대표 문구가 뜰 때까지 기다린다 */
 const openSite = async (path = '/') => {
   const router = renderAt(path);
-  await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' });
+  await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' }, { timeout: 8000 }); // 병렬 실행 중 첫 lazy 로딩은 1초를 넘길 수 있다
   return router;
 };
 
@@ -200,7 +200,7 @@ describe('서비스 ↔ 홈페이지, 예전 주소', () => {
     const router = renderAt('/app/my');
     await user.click(await screen.findByRole('link', { name: 'OFFROU 소개' }));
     expect(router.state.location.pathname).toBe('/');
-    expect(await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' }, { timeout: 8000 })).toBeInTheDocument();
   });
 
   it.each([

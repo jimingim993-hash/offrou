@@ -8,12 +8,13 @@ import {
   explainInstant,
   explainRecommendation,
   pickDaily,
+  pickFromPool,
   recommendExperience,
   recommendInstant,
   type Recommendation,
 } from './recommendation';
 import { generateCourse, type Course } from './course';
-import { getExperience } from './experiences';
+import { getExperience, listExperiences } from './experiences';
 import { STORAGE_KEYS, isObject, readJson, writeJson } from './storage';
 import type { CourseMinutes, CourseVibe } from '@/data/courses';
 
@@ -62,6 +63,14 @@ export function getNextInstant(excludeId?: string): Recommendation | undefined {
     noteShown(rec.experience.id);
   }
   return rec;
+}
+
+/** 또 놀아볼래? — 실행형 PLAY 중 방금 것과 다른 하나 (기록·최근 추천을 반영하는 공통 선택 단계) */
+export function getNextPlay(excludeId?: string): Experience | undefined {
+  const pool = listExperiences().filter((e) => e.interaction?.type === 'play');
+  const picked = pickFromPool(pool, { excludeId, history: getUserHistory() });
+  if (picked) noteShown(picked.experience.id);
+  return picked?.experience;
 }
 
 export const getInstantReason = (experience: Experience) => explainInstant(experience, getUserHistory());

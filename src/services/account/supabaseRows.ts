@@ -55,6 +55,7 @@ export const TABLES = {
   taste: 'offrou_taste',
   courseRuns: 'offrou_course_runs',
   savedCourses: 'offrou_saved_courses',
+  pushSubscriptions: 'offrou_push_subscriptions',
 } as const;
 
 export interface CourseRunRow {

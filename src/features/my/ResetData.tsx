@@ -46,7 +46,8 @@ export function ResetData() {
             variant="ghost"
             onClick={() => {
               // 로그인 중이면 계정 연결 정보는 남긴다 (서버 데이터는 건드리지 않음)
-              resetAllData(signedIn ? { keep: [STORAGE_KEYS.account] } : undefined);
+              // 알림 설정은 기기 설정이라 남긴다 (끄기는 'MY → 새로운 시간 알림'에서)
+              resetAllData({ keep: signedIn ? [STORAGE_KEYS.account, STORAGE_KEYS.notify] : [STORAGE_KEYS.notify] });
               setOpen(false);
               setDone(true);
             }}

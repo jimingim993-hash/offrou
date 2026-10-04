@@ -1,0 +1,67 @@
+.offline {
+  max-width: var(--content-max);
+  margin: 0 auto var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--brand-accent-soft);
+  border-radius: var(--radius-md);
+}
+
+.update {
+  position: fixed;
+  z-index: 40;
+  left: max(var(--space-4), env(safe-area-inset-left));
+  right: max(var(--space-4), env(safe-area-inset-right));
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  max-width: calc(var(--content-max) - var(--space-4));
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+.aboveNav {
+  bottom: calc(var(--nav-height) + var(--space-3) + env(safe-area-inset-bottom));
+}
+
+.updateText {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.updateButtons {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.later,
+.apply {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.later {
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+}
+
+.apply {
+  color: var(--color-text-on-primary);
+  background: var(--brand-primary);
+  border: 0;
+}

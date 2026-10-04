@@ -48,3 +48,10 @@
   color: var(--brand-primary);
   background: var(--brand-primary-soft);
 }
+
+/* 글자를 입력하는 동안(휴대폰 키보드가 올라온 동안) 내비가 입력창을 가리지 않게 숨긴다 */
+@media (max-width: 767px) {
+  .typing {
+    display: none;
+  }
+}

@@ -2,7 +2,23 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import fs from 'node:fs';
+import path from 'node:path';
 import { injectSeoTags } from './seo-meta';
+import { injectServiceWorkerBuild, precacheFiles } from './pwa-build';
+
+/** 빌드가 끝나면 dist/sw.js에 미리 저장할 파일 목록과 버전을 넣는다 (오프라인 실행·안전한 업데이트용) */
+const serviceWorkerPrecache = (): Plugin => ({
+  name: 'offrou-sw-precache',
+  apply: 'build',
+  writeBundle(options, bundle) {
+    const outDir = options.dir ?? 'dist';
+    const swPath = path.join(outDir, 'sw.js');
+    if (!fs.existsSync(swPath)) return;
+    const files = precacheFiles(Object.keys(bundle));
+    fs.writeFileSync(swPath, injectServiceWorkerBuild(fs.readFileSync(swPath, 'utf8'), files));
+  },
+});
 
 /** 배포 주소·공유 이미지가 환경변수로 주어졌을 때만 canonical·og:url·og:image를 넣는다 */
 const seoMeta = (env: Record<string, string>): Plugin => ({
@@ -13,7 +29,7 @@ const seoMeta = (env: Record<string, string>): Plugin => ({
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
-    plugins: [react(), seoMeta(env)],
+    plugins: [react(), seoMeta(env), serviceWorkerPrecache()],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

@@ -238,6 +238,6 @@ describe('보안 기본 점검 (정적)', () => {
     expect(ignore).toMatch(/^\.env\.\*$/m);
     const example = readFileSync(join(root, '.env.example'), 'utf8');
     const vars = example.split('\n').filter((l) => /^[A-Z_]+=/.test(l));
-    expect(vars).toEqual(['VITE_SUPABASE_URL=', 'VITE_SUPABASE_ANON_KEY=', 'VITE_SITE_URL=', 'VITE_OG_IMAGE=']);
+    expect(vars).toEqual(['VITE_SUPABASE_URL=', 'VITE_SUPABASE_ANON_KEY=', 'VITE_SITE_URL=', 'VITE_OG_IMAGE=', 'VITE_VAPID_PUBLIC_KEY=']);
   });
 });

@@ -5,6 +5,7 @@ import { RestRunner } from './RestRunner';
 import { PromptRunner } from './PromptRunner';
 import { FocusRunner } from './FocusRunner';
 import { StoryRunner } from '../story/StoryRunner';
+import { PlayRunner } from '@/features/play/PlayRunner';
 import type { RunnerProps } from './types';
 
 /** 실행 방식별 실행기. 새 방식을 추가하면 여기에 등록한다. */
@@ -14,6 +15,7 @@ const RUNNERS: Record<InteractionType, ComponentType<RunnerProps>> = {
   prompts: PromptRunner,
   focus: FocusRunner,
   story: StoryRunner,
+  play: PlayRunner,
 };
 
 export function getRunner(experience: Experience): ComponentType<RunnerProps> {

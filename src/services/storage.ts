@@ -21,6 +21,8 @@ export const STORAGE_KEYS = {
   savedCourses: 'offrou.saved-courses.v1',
   /** 오늘의 OFFROU (날짜별 하나, 이 기기에만) */
   daily: 'offrou.daily.v1',
+  /** "새로운 시간" 알림 설정 (켬/끔·시간·빈도, 이 기기에만) */
+  notify: 'offrou.notify.v1',
   /** sessionStorage: 지금 추천 세션에서 이미 보여준 경험 */
   session: 'offrou.session.v1',
 } as const;

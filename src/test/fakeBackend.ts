@@ -13,7 +13,7 @@ import {
   type SavedRow,
   type TasteRow,
 } from '@/services/account/supabaseRows';
-import type { AccountBackend, AuthEvent, AuthUser } from '@/services/account/types';
+import type { AccountBackend, AuthEvent, AuthUser, PushSubscriptionInput } from '@/services/account/types';
 import { EMPTY_SNAPSHOT, type UserSnapshot } from '@/services/sync/snapshot';
 
 /**
@@ -47,6 +47,10 @@ export class FakeServer {
   online = true;
   requireEmailConfirm = false;
   resetEmails: string[] = [];
+  /** 알림 구독 (endpoint → 사용자·설정). 같은 endpoint는 한 계정에만 */
+  pushSubs = new Map<string, PushSubscriptionInput & { userId: string }>();
+  /** false면 알림 저장소가 없는 서버 (구버전·마이그레이션 전) */
+  pushEnabled = true;
   private seq = 0;
 
   tablesFor(userId: string): UserTables {
@@ -85,6 +89,19 @@ export class FakeServer {
 }
 
 function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeServer } {
+  const pushStore: AccountBackend['push'] = {
+    async save(sub) {
+      net();
+      const user = requireSession();
+      server.pushSubs.set(sub.endpoint, { ...sub, userId: user.id });
+    },
+    async remove(endpoint) {
+      net();
+      const user = requireSession();
+      if (server.pushSubs.get(endpoint)?.userId === user.id) server.pushSubs.delete(endpoint);
+    },
+  };
+
   const listeners = new Set<(u: AuthUser | null, e: AuthEvent) => void>();
 
   const readSession = (): AuthUser | null => {
@@ -116,6 +133,10 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
 
   return {
     server,
+
+    get push() {
+      return server.pushEnabled ? pushStore : undefined;
+    },
 
     async getUser() {
       return readSession();
@@ -170,6 +191,7 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
       const session = requireSession();
       for (const [email, u] of server.users) if (u.id === session.id) server.users.delete(email);
       server.tables.delete(session.id); // on delete cascade
+      for (const [endpoint, sub] of server.pushSubs) if (sub.userId === session.id) server.pushSubs.delete(endpoint);
       setSession(null, 'signed_out');
     },
 

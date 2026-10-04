@@ -61,13 +61,34 @@ public/          manifest.webmanifest, sw.js, icons/
 로그인하지 않아도 모든 기능을 쓸 수 있다. 계정을 만들면 다른 기기에서도 기록을 이어볼 수 있다.
 
 1. [Supabase](https://supabase.com) 프로젝트를 만든다.
-2. SQL Editor에서 `supabase/migrations/`의 파일을 이름 순서대로 실행한다 (`20261003…_offrou_user_data.sql`: 테이블·RLS·계정 삭제 함수, `20261004…_offrou_courses.sql`: 코스 기록·저장한 코스).
+2. SQL Editor에서 `supabase/migrations/`의 파일을 이름 순서대로 실행한다 (`20261003…`: 기록 테이블·RLS·계정 삭제 함수, `20261004…`: 코스, `20261005…`: 알림 구독, `20261006…`: 실행형 PLAY 기록).
 3. Authentication → URL Configuration: Site URL을 배포 주소로, Redirect URLs에 `<배포 주소>/app/account`, `<배포 주소>/app/account/reset` (개발: `http://localhost:5173/app/account`, `http://localhost:5173/app/account/reset`)을 추가한다. (예전 `/account…` 링크는 자동으로 `/app/account…`로 이동)
 4. `.env.example`을 `.env.local`로 복사해 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`(공개 키)를 채운다. service_role/secret 키는 절대 넣지 않는다.
 
 - 환경변수가 없으면 계정 기능만 꺼지고 비회원 OFFROU는 그대로 동작한다.
 - 기록은 이 기기에 먼저 저장되고(local-first) 로그인 중이면 계정과 병합 동기화된다 (`src/services/sync`).
 - 인증·원격 저장은 `src/services/account/types.ts`의 인터페이스 뒤에 있다 (Supabase 구현 / 테스트용 메모리 구현).
+
+## 앱 설치·오프라인·알림 (9단계)
+
+- **설치**: `public/manifest.webmanifest` (이름 OFFROU, 시작 주소 `/app`). 설치 안내는 MY → "앱과 알림"에서만 보여준다 (Android: 브라우저가 허락할 때만 버튼, iPhone·iPad Safari: "공유 → 홈 화면에 추가" 안내).
+- **아이콘은 임시**다 → `public/icons/README.md`의 표대로 같은 이름·크기로 교체.
+- **서비스 워커** (`public/sw.js`): 빌드 때 `pwa-build.ts`가 실제 파일 목록·버전을 넣어 앱 전체를 미리 저장 → 한 번 연 뒤에는 오프라인에서도 열린다. 새 버전은 "새로운 OFFROU가 준비됐어 [업데이트]"를 눌렀을 때만 적용 (경험·코스 진행 중에는 안내하지 않음).
+- **"새로운 시간" 알림** (선택, 기본 꺼짐, 로그인 사용자만):
+  1. `supabase/migrations/20261005…_offrou_push.sql` 실행 (구독 테이블·RLS·저장 함수).
+  2. VAPID 키 생성: `npx web-push generate-vapid-keys`.
+  3. 공개 키만 `.env.local`의 `VITE_VAPID_PUBLIC_KEY`에. **private key는 프런트에 넣지 않는다.**
+  4. 발송 함수 배포: `supabase functions deploy send-new-time --no-verify-jwt`, secret 등록: `supabase secrets set VAPID_PUBLIC_KEY=… VAPID_PRIVATE_KEY=… VAPID_SUBJECT=mailto:… CRON_SECRET=…`.
+  5. pg_cron·pg_net으로 15분마다 호출 (마이그레이션 파일 끝의 주석 SQL 참고).
+  - 발송 규칙(사용자 시간대 기준, 하루 한 번, "가끔"=화·금)은 `supabase/functions/send-new-time/schedule.ts`.
+
+## 실행형 PLAY (10단계)
+
+- 데이터: `src/data/play/` — `programs.ts`(프로그램 10개: 종류·안내·타이머·완료 문구), `pools.ts`(단어 70·선택 32·낙서 주제 32·사진 미션 32·질문 42 등).
+- 엔진: `src/features/play/PlayRunner.tsx` — 경험의 `interaction: { type: 'play', program }`으로 프로그램을 찾아 종류별 화면(`programs/`)을 그린다. 못 찾으면 안내형 화면으로.
+- 공통: 타이머 `src/hooks/useCountdown.ts`(REST 타이머도 사용), 랜덤 `src/services/random.ts`.
+- 완료 기록은 기존 경험 기록(kind `play`)을 그대로 쓴다. 낙서 그림·메모·답은 저장하지 않는다. 카메라·마이크·위치를 쓰지 않는다.
+- 계정 동기화를 쓰면 `supabase/migrations/20261006…_offrou_play_kind.sql`도 실행한다 (실행 전에도 동작: 서버가 거부하면 그 기록의 kind만 비워 올림).
 
 ## 개인화 (이 기기 안에서만)
 
