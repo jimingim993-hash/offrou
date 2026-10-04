@@ -141,7 +141,7 @@ describe('서버 행 변환', () => {
     const row = toCompletionRow('user-A', r);
     expect(row.user_id).toBe('user-A');
     expect(fromCompletionRow(row)).toEqual(r);
-    const rows = pushToRows('user-A', { records: [r], saved: [], feedback: [], activity: undefined });
+    const rows = pushToRows('user-A', { records: [r], saved: [], feedback: [], activity: undefined, courseRuns: [], savedCourses: [] });
     expect(rows.completions.every((x) => x.user_id === 'user-A')).toBe(true);
     expect(rows.taste).toBeNull();
   });

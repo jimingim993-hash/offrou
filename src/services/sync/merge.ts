@@ -1,6 +1,7 @@
 import type { ActivitySignals, FeedbackEntry, OffrouRecord } from '@/types/offrou';
 import { RECENT_LIMIT, RECENT_VIEW_LIMIT } from '../activity';
 import type { SavedItem } from '../saved';
+import type { CourseRun, SavedCourse } from '../courses';
 import type { UserSnapshot } from './snapshot';
 
 /**
@@ -11,6 +12,8 @@ import type { UserSnapshot } from './snapshot';
  * - 저장: 경험별로 마지막에 일어난 일(저장 또는 취소)이 이긴다.
  * - 피드백: 완료 기록별로 마지막에 남긴 값이 이긴다.
  * - 사용 신호: 횟수는 큰 값, 최근 목록은 이 기기(a) 것을 앞세워 합친다.
+ * - 코스 진행: 진행 id별로 마친 경험을 합친다 (끝낸 시각은 남아 있는 쪽).
+ * - 저장한 코스: 코스별로 마지막에 일어난 저장/취소가 이긴다.
  */
 export function mergeSnapshots(a: UserSnapshot, b: UserSnapshot): UserSnapshot {
   return {
@@ -18,7 +21,38 @@ export function mergeSnapshots(a: UserSnapshot, b: UserSnapshot): UserSnapshot {
     saved: mergeSaved(a.saved, b.saved),
     feedback: mergeFeedback(a.feedback, b.feedback),
     activity: mergeActivity(a.activity, b.activity),
+    courseRuns: mergeCourseRuns(a.courseRuns, b.courseRuns),
+    savedCourses: mergeSavedCourses(a.savedCourses, b.savedCourses),
   };
+}
+
+export function mergeCourseRuns(a: CourseRun[], b: CourseRun[]): CourseRun[] {
+  const map = new Map<string, CourseRun>();
+  for (const r of [...a, ...b]) {
+    const prev = map.get(r.id);
+    if (!prev) {
+      map.set(r.id, r);
+      continue;
+    }
+    const newer = r.updatedAt > prev.updatedAt ? r : prev;
+    map.set(r.id, {
+      ...newer,
+      completedIds: [...prev.completedIds, ...r.completedIds.filter((id) => !prev.completedIds.includes(id))],
+      endedAt: prev.endedAt ?? r.endedAt,
+    });
+  }
+  return [...map.values()];
+}
+
+const courseEvent = (c: SavedCourse) => (c.removedAt && c.removedAt > c.savedAt ? c.removedAt : c.savedAt);
+
+export function mergeSavedCourses(a: SavedCourse[], b: SavedCourse[]): SavedCourse[] {
+  const map = new Map<string, SavedCourse>();
+  for (const c of [...a, ...b]) {
+    const prev = map.get(c.id);
+    if (!prev || courseEvent(c) > courseEvent(prev)) map.set(c.id, c);
+  }
+  return [...map.values()];
 }
 
 const recordKey = (r: OffrouRecord) => `${r.experienceId}|${r.completedAt}`;
@@ -94,10 +128,18 @@ export function diffForPush(merged: UserSnapshot, server: UserSnapshot) {
       return !prev || prev.value !== f.value || prev.at !== f.at;
     }),
     activity: JSON.stringify(merged.activity) === JSON.stringify(server.activity) ? undefined : merged.activity,
+    courseRuns: merged.courseRuns.filter((r) => {
+      const prev = server.courseRuns.find((x) => x.id === r.id);
+      return !prev || JSON.stringify(prev) !== JSON.stringify(r);
+    }),
+    savedCourses: merged.savedCourses.filter((c) => {
+      const prev = server.savedCourses.find((x) => x.id === c.id);
+      return !prev || prev.savedAt !== c.savedAt || prev.removedAt !== c.removedAt;
+    }),
   };
 }
 
 export type PushPayload = ReturnType<typeof diffForPush>;
 
 export const isEmptyPush = (p: PushPayload) =>
-  !p.records.length && !p.saved.length && !p.feedback.length && !p.activity;
+  !p.records.length && !p.saved.length && !p.feedback.length && !p.activity && !p.courseRuns.length && !p.savedCourses.length;

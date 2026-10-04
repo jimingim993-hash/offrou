@@ -5,6 +5,9 @@ import { getExperience } from '@/services/experiences';
 import { addRecord } from '@/services/records';
 import { noteStarted } from '@/services/activity';
 import { parseReadyParams } from '@/features/ready/readyParams';
+import { endCourseRun, recordCourseStep } from '@/services/courses';
+import { courseDonePath, courseNextPath, parseCourseParams } from '@/features/course/courseParams';
+import { ProgressDots } from '@/components/ui/ProgressDots';
 import { getRunner, type RunResult } from './runners';
 import type { DoneState } from './ExperienceDonePage';
 import { ExitSheet } from './ExitSheet';
@@ -15,6 +18,7 @@ import styles from './ExperiencePlayPage.module.css';
  * 경험 진행 화면(공통 틀).
  * 경험의 실행 방식에 맞는 실행기를 그리고, 나가기·기록·완료 이동만 여기서 처리한다.
  * 타이머를 강제하지 않으며 언제든 나가거나 마칠 수 있다.
+ * 작은 코스 안이면(쿼리 cmin·cvibe·csteps·cstep·crun) 진행 표시를 보여주고, 마치면 다음 시간으로 이어준다.
  */
 export function ExperiencePlayPage() {
   const { experienceId } = useParams();
@@ -38,12 +42,38 @@ export function ExperiencePlayPage() {
   const category = CATEGORIES.find((c) => c.id === experience.categoryId);
   const Runner = getRunner(experience);
 
+  const { course, step, runId } = parseCourseParams(params);
+  const inCourse = course && step !== undefined && runId && course.stepIds[step] === experience.id ? { course, step, runId } : null;
+
   const finish = (result: RunResult = {}) => {
     if (finished.current) return;
     finished.current = true;
     const { mood, duration } = parseReadyParams(params);
-    const record = addRecord(experience, { moodId: mood?.id, durationId: duration?.id, endingTitle: result.endingTitle });
+    const record = addRecord(experience, {
+      moodId: mood?.id,
+      durationId: duration?.id,
+      endingTitle: result.endingTitle,
+      courseRunId: inCourse?.runId,
+    });
+    if (inCourse) {
+      const { course, step, runId } = inCourse;
+      recordCourseStep(runId, course, experience.id);
+      if (step + 1 < course.stepIds.length) {
+        navigate(courseNextPath(course, step + 1, runId), { replace: true });
+      } else {
+        endCourseRun(runId, course);
+        navigate(courseDonePath(course, runId), { replace: true });
+      }
+      return;
+    }
     navigate(donePath(experience.id), { replace: true, state: { ...result, recordId: record.id } satisfies DoneState });
+  };
+
+  // 코스를 여기까지만 (지금 시간은 기록하지 않고, 이미 마친 시간은 그대로 남는다)
+  const endCourse = () => {
+    if (!inCourse) return;
+    endCourseRun(inCourse.runId, inCourse.course);
+    navigate(courseDonePath(inCourse.course, inCourse.runId), { replace: true });
   };
 
   // 기록 없이 나가기. 앱 안에서 들어왔으면 이전 화면으로, 아니면 경험 상세로.
@@ -63,11 +93,23 @@ export function ExperiencePlayPage() {
         </span>
       </div>
 
+      {inCourse && (
+        <div className={styles.course}>
+          <span className={styles.courseTitle}>{inCourse.course.title}</span>
+          <ProgressDots total={inCourse.course.stepIds.length} current={inCourse.step + 1} />
+        </div>
+      )}
+
       <h1 className={styles.title}>{experience.title}</h1>
 
       <Runner experience={experience} onFinish={finish} />
 
-      {exitOpen && <ExitSheet onFinishHere={() => finish()} onLeave={leave} onStay={() => setExitOpen(false)} />}
+      {exitOpen &&
+        (inCourse ? (
+          <ExitSheet courseMode onEndCourse={endCourse} onStay={() => setExitOpen(false)} />
+        ) : (
+          <ExitSheet onFinishHere={() => finish()} onLeave={leave} onStay={() => setExitOpen(false)} />
+        ))}
     </div>
   );
 }

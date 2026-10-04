@@ -189,7 +189,12 @@ describe('카테고리별 실행 화면', () => {
     expect(screen.getByText('잠깐 창밖을 바라봐.')).toBeInTheDocument();
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /타이머 켜기/ }));
+    // 휴식 타이머는 선택형 3분 / 5분
+    expect(screen.getAllByRole('button', { name: /타이머 켜기/ }).map((b) => b.textContent)).toEqual([
+      '타이머 켜기 · 3분',
+      '타이머 켜기 · 5분',
+    ]);
+    await user.click(screen.getByRole('button', { name: '타이머 켜기 · 5분' }));
     expect(screen.getByRole('timer')).toHaveTextContent('5:00');
     await user.click(screen.getByRole('button', { name: '타이머 끄기' }));
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();

@@ -37,7 +37,7 @@ export const REST_EXPERIENCES: Experience[] = [
       '생각이 떠오르면 붙잡지 말고 흘려보내.',
     ],
     doneMessage: '바깥은 계속 흘러가고, 너는 잠깐 멈춰 있었어.',
-    interaction: { type: 'rest', prompt: '잠깐 창밖을 바라봐.', tone: 'sky' },
+    interaction: { type: 'rest', prompt: '잠깐 창밖을 바라봐.', tone: 'sky', lines: ['하늘의 색을 한 가지 골라봐.', '구름이 움직이는지 잠깐 지켜봐.', '눈에 들어오는 것 하나에만 머물러.'] },
   },
   {
     id: 'rest-dim-light',
@@ -56,7 +56,7 @@ export const REST_EXPERIENCES: Experience[] = [
       '아무것도 하지 않아도 괜찮다고 스스로에게 말해줘.',
     ],
     doneMessage: '아무것도 안 한 10분도 충분히 좋은 시간이야.',
-    interaction: { type: 'rest', prompt: '불을 낮추고, 아무것도 하지 않아도 돼.', tone: 'night' },
+    interaction: { type: 'rest', prompt: '불을 낮추고, 아무것도 하지 않아도 돼.', tone: 'night', lines: ['지금은 아무것도 하지 않아도 되는 시간이야.', '어깨에 힘이 들어가 있다면 조금 내려놔.', '조용함이 방 안에 천천히 퍼지게 둬.'] },
   },
   {
     id: 'rest-warm-drink',
@@ -113,7 +113,7 @@ export const REST_EXPERIENCES: Experience[] = [
       '열 번이 될 때까지 숫자만 따라가 봐.',
     ],
     doneMessage: '숨 열 번만큼, 몸이 조금 풀렸을 거야.',
-    interaction: { type: 'rest', prompt: '넷에 들이쉬고, 여섯에 내쉬어.', tone: 'sky' },
+    interaction: { type: 'rest', prompt: '넷에 들이쉬고, 여섯에 내쉬어.', tone: 'sky', lines: ['들이쉬면서 하나.', '내쉬면서 조금 더 길게.', '숫자를 놓쳐도 괜찮아. 다시 하나부터.'] },
   },
   {
     id: 'rest-blanket',
@@ -162,7 +162,7 @@ export const REST_EXPERIENCES: Experience[] = [
     supplies: [],
     steps: ['편하게 앉거나 누워 눈을 감아.', '가까운 소리부터 먼 소리까지 하나씩 찾아봐.', '세 가지를 찾으면 천천히 눈을 떠.'],
     doneMessage: '조용함 속에 숨어 있던 소리를 만났어.',
-    interaction: { type: 'rest', prompt: '눈을 감고, 소리 세 가지.', tone: 'night' },
+    interaction: { type: 'rest', prompt: '눈을 감고, 소리 세 가지.', tone: 'night', lines: ['가장 가까운 소리 하나.', '조금 먼 소리 하나.', '아주 작은 소리 하나.'] },
   },
   {
     id: 'rest-foot-bath',

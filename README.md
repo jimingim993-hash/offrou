@@ -20,7 +20,9 @@ npm run preview    # 빌드 결과 확인 http://localhost:4173 (서비스 워�
 | 주소 | 내용 |
 |---|---|
 | `/` | OFFROU 공식 홈페이지 (따로 불러오는 chunk) |
-| `/app` | 서비스 HOME (설치한 PWA는 여기서 시작) |
+| `/app` | 서비스 HOME — 지금 딱 하나 · 나에게 맞춰서 · 작은 OFFROU 코스 · 오늘의 OFFROU (설치한 PWA는 여기서 시작) |
+| `/app/now` | 지금 딱 하나 (질문 없이 바로 하나, `?pick=`) |
+| `/app/course` · `/app/course/next` · `/app/course/done` | 작은 코스 만들기·중간·마무리 (코스는 `?cmin=&cvibe=&csteps=`에 담긴다) |
 | `/app/ready` · `/app/discover/:카테고리` · `/app/experience/:id(/play·/done)` · `/app/my` · `/app/account(/reset)` | 서비스 화면 |
 | `/ready`, `/discover/*`, `/experience/*`, `/my`, `/account/*` | 예전 주소 → `/app/...`으로 이동 (쿼리·해시 유지) |
 
@@ -59,7 +61,7 @@ public/          manifest.webmanifest, sw.js, icons/
 로그인하지 않아도 모든 기능을 쓸 수 있다. 계정을 만들면 다른 기기에서도 기록을 이어볼 수 있다.
 
 1. [Supabase](https://supabase.com) 프로젝트를 만든다.
-2. SQL Editor에서 `supabase/migrations/20261003000000_offrou_user_data.sql`을 실행한다 (테이블·RLS·계정 삭제 함수).
+2. SQL Editor에서 `supabase/migrations/`의 파일을 이름 순서대로 실행한다 (`20261003…_offrou_user_data.sql`: 테이블·RLS·계정 삭제 함수, `20261004…_offrou_courses.sql`: 코스 기록·저장한 코스).
 3. Authentication → URL Configuration: Site URL을 배포 주소로, Redirect URLs에 `<배포 주소>/app/account`, `<배포 주소>/app/account/reset` (개발: `http://localhost:5173/app/account`, `http://localhost:5173/app/account/reset`)을 추가한다. (예전 `/account…` 링크는 자동으로 `/app/account…`로 이동)
 4. `.env.example`을 `.env.local`로 복사해 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`(공개 키)를 채운다. service_role/secret 키는 절대 넣지 않는다.
 
@@ -75,7 +77,8 @@ public/          manifest.webmanifest, sw.js, icons/
 
 ## 확장 지점
 
-- `src/services/recommendation.ts` — 추천 규칙/가중치 (`recommendExperience` 입력·출력만 유지하면 UI 수정 불필요)
+- `src/services/recommendation.ts` — 추천 규칙/가중치. 상태+시간(`recommendExperience`) · 지금 딱 하나(`recommendInstant`) · 오늘의 OFFROU(`pickDaily`)가 공통 선택 단계(`pickFromPool`)를 공유
+- `src/services/course.ts` — 작은 코스 생성 규칙 (시간 범위·분위기는 `src/data/courses.ts`)
 - `src/services/experiences.ts` — 정적 데이터 → 콘텐츠 API 교체
 - `src/services/records.ts` — localStorage → 선택적 계정 동기화
 - `src/features/experience/runners/index.ts` — 새 실행 방식 등록

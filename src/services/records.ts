@@ -38,10 +38,11 @@ interface AddRecordContext {
   durationId?: DurationId;
   /** 이야기 경험의 결말 제목 */
   endingTitle?: string;
+  courseRunId?: string;
   now?: Date;
 }
 
-export function addRecord(experience: Experience, { moodId, durationId, endingTitle, now = new Date() }: AddRecordContext = {}) {
+export function addRecord(experience: Experience, { moodId, durationId, endingTitle, courseRunId, now = new Date() }: AddRecordContext = {}) {
   const record: OffrouRecord = {
     id: createId(),
     experienceId: experience.id,
@@ -53,6 +54,7 @@ export function addRecord(experience: Experience, { moodId, durationId, endingTi
     ...(moodId && { moodId }),
     ...(durationId && { durationId }),
     ...(endingTitle && { endingTitle }),
+    ...(courseRunId && { courseRunId }),
   };
   writeJson(STORAGE_KEYS.records, [...read(), record]);
   return record;

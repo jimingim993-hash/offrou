@@ -15,6 +15,12 @@ export const STORAGE_KEYS = {
   account: 'offrou.account.v1',
   /** '새로 시작하기'를 고를 때 따로 보관해 둔 비회원 기록 (자동 삭제하지 않는다) */
   guestBackup: 'offrou.guest-backup.v1',
+  /** 작은 코스 진행 기록 */
+  courseRuns: 'offrou.course-runs.v1',
+  /** 저장한 코스 */
+  savedCourses: 'offrou.saved-courses.v1',
+  /** 오늘의 OFFROU (날짜별 하나, 이 기기에만) */
+  daily: 'offrou.daily.v1',
   /** sessionStorage: 지금 추천 세션에서 이미 보여준 경험 */
   session: 'offrou.session.v1',
 } as const;

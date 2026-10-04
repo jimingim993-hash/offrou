@@ -101,6 +101,12 @@ export function HowItWorksSection() {
             </li>
           ))}
         </ol>
+        <Reveal>
+          <p className={styles.howMore}>
+            고르기도 귀찮은 날엔 <strong>지금 딱 하나</strong>, 조금 길게 보내고 싶은 날엔{' '}
+            <strong>작은 OFFROU 코스</strong>도 있어.
+          </p>
+        </Reveal>
       </div>
     </section>
   );

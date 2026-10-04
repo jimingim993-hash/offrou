@@ -67,7 +67,7 @@ export interface PlayPrompt {
  */
 export type Interaction =
   | { type: 'guide' }
-  | { type: 'rest'; prompt: string; tone: RestTone }
+  | { type: 'rest'; prompt: string; tone: RestTone; /** 천천히 하나씩 보여줄 짧은 문장 */ lines?: string[] }
   | { type: 'prompts'; prompts: PlayPrompt[]; vars?: Record<string, string[]> }
   | { type: 'focus'; label: string; subjects: string[] }
   | { type: 'story'; storyId: string };
@@ -127,6 +127,8 @@ export interface OffrouRecord {
   kind?: InteractionType;
   /** 이야기 경험의 결말 제목 */
   endingTitle?: string;
+  /** 작은 코스 안에서 완료했다면 그 코스 진행 id (MY에서 코스 하나로 묶어 보여준다) */
+  courseRunId?: string;
 }
 
 /* ─── 개인화 (4단계) ─── */

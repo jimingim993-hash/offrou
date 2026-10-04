@@ -249,3 +249,14 @@
   align-items: center;
   color: var(--color-text-muted);
 }
+
+.unsave {
+  width: 44px;
+  height: 44px;
+  font-size: 1.05rem;
+  color: var(--brand-accent);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}

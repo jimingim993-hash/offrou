@@ -3,7 +3,19 @@ import type { CategoryId, DurationOption, Experience, MoodId, RecommendMode, Use
 import { getRecords } from './records';
 import { getFeedback } from './feedback';
 import { getActivity, getSessionSeen, noteShown, setSessionSeen } from './activity';
-import { explainRecommendation, recommendExperience, type Recommendation } from './recommendation';
+import {
+  dayKey,
+  explainInstant,
+  explainRecommendation,
+  pickDaily,
+  recommendExperience,
+  recommendInstant,
+  type Recommendation,
+} from './recommendation';
+import { generateCourse, type Course } from './course';
+import { getExperience } from './experiences';
+import { STORAGE_KEYS, isObject, readJson, writeJson } from './storage';
+import type { CourseMinutes, CourseVibe } from '@/data/courses';
 
 /**
  * 화면과 추천 엔진 사이의 연결 계층.
@@ -36,6 +48,53 @@ export function getNextRecommendation({ mood, duration, mode, excludeId }: NextI
 
 export const getReason = (experience: Experience, duration: DurationOption, mode: RecommendMode) =>
   explainRecommendation(experience, { duration, mode, history: getUserHistory() });
+
+/* ─── 지금 딱 하나 ─── */
+
+const INSTANT_SESSION = 'instant';
+
+/** 아무것도 고르지 않고 바로 하나. 이번 세션에서 보여준 건 한 바퀴 돌기 전엔 다시 나오지 않는다. */
+export function getNextInstant(excludeId?: string): Recommendation | undefined {
+  const seen = getSessionSeen(INSTANT_SESSION);
+  const rec = recommendInstant({ excludeId, seenIds: seen, history: getUserHistory() });
+  if (rec) {
+    setSessionSeen(INSTANT_SESSION, rec.cycled ? [rec.experience.id] : [...seen, rec.experience.id]);
+    noteShown(rec.experience.id);
+  }
+  return rec;
+}
+
+export const getInstantReason = (experience: Experience) => explainInstant(experience, getUserHistory());
+
+/* ─── 오늘의 OFFROU ─── */
+
+interface DailyPick {
+  date: string;
+  experienceId: string;
+}
+
+const isDaily = (v: unknown): v is DailyPick => isObject(v) && typeof v.date === 'string' && typeof v.experienceId === 'string';
+
+/**
+ * 오늘의 OFFROU. 날짜로 정해지고, 처음 정한 결과를 그날 동안 그대로 보여준다
+ * (오늘 이미 해봤어도 바뀌지 않는다). 다음 날엔 어제와 다른 것으로 바뀐다. 출석·보상 같은 건 없다.
+ */
+export function getTodayOffrou(now = new Date()): Experience | undefined {
+  const today = dayKey(now);
+  const stored = readJson<DailyPick | null>(STORAGE_KEYS.daily, null, isDaily);
+  if (stored?.date === today) {
+    const kept = getExperience(stored.experienceId);
+    if (kept) return kept;
+  }
+  const picked = pickDaily({ date: now, history: getUserHistory(), previousId: stored?.experienceId });
+  if (picked) writeJson(STORAGE_KEYS.daily, { date: today, experienceId: picked.id } satisfies DailyPick);
+  return picked;
+}
+
+/* ─── 작은 OFFROU 코스 ─── */
+
+export const makeCourse = (minutes: CourseMinutes, vibe: CourseVibe, avoidIds: string[] = []): Course | undefined =>
+  generateCourse({ minutes, vibe, avoidIds, history: getUserHistory() });
 
 /* ─── MY 요약 ─── */
 

@@ -1,3 +1,4 @@
+import { formatMinutes } from '@/data/durations';
 import { listExperiences } from './experiences';
 import type {
   CategoryId,
@@ -91,7 +92,7 @@ export function summarize(history: UserHistory) {
   return { completed, categoryDone, good, meh, expGood, expMeh, recentDone };
 }
 
-type Summary = ReturnType<typeof summarize>;
+export type Summary = ReturnType<typeof summarize>;
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
@@ -102,7 +103,7 @@ const affinity = (s: Summary, c: CategoryId) =>
 /** 새로움: 적게 경험한 카테고리일수록 크다 */
 const novelty = (s: Summary, c: CategoryId) => 1 / (1 + 0.5 * (s.categoryDone.get(c) ?? 0));
 
-function itemWeight(e: Experience, s: Summary, history: UserHistory, fresh: boolean) {
+export function itemWeight(e: Experience, s: Summary, history: UserHistory, fresh: boolean) {
   const done = s.completed.get(e.id) ?? 0;
   let w = 1;
   if (fresh) {
@@ -117,7 +118,7 @@ function itemWeight(e: Experience, s: Summary, history: UserHistory, fresh: bool
   return w;
 }
 
-function weightedPick<T>(items: T[], weight: (t: T) => number, random: () => number): T {
+export function weightedPick<T>(items: T[], weight: (t: T) => number, random: () => number): T {
   const weights = items.map(weight);
   const total = weights.reduce((a, b) => a + b, 0);
   let r = random() * total;
@@ -168,6 +169,42 @@ export function recommendExperience({
   exploreRate = EXPLORE_RATE,
 }: RecommendInput): Recommendation | undefined {
   const candidates = candidatesFor(mood, duration, mode, experiences);
+  const picked = pickFromPool(candidates, { experiences, history, mode, excludeId, seenIds, random, exploreRate });
+  if (!picked) return undefined;
+  return {
+    ...picked,
+    reason: explainRecommendation(picked.experience, { duration, mode, history }),
+    candidateCount: candidates.length,
+  };
+}
+
+interface PoolOptions {
+  experiences?: Experience[];
+  history?: UserHistory;
+  mode?: RecommendMode;
+  excludeId?: string | null;
+  seenIds?: string[];
+  random?: () => number;
+  exploreRate?: number;
+}
+
+/**
+ * 후보 안에서 하나를 고르는 공통 단계. 상태+시간 추천, 지금 딱 하나, 오늘의 OFFROU가 함께 쓴다.
+ * - 직전·세션·최근 기록을 단계적으로 제외하되, 부족하면 풀어서라도 반드시 하나를 고른다.
+ * - 카테고리를 먼저 고르고 그 안에서 고른다 (한 종류만 계속 나오지 않게).
+ */
+export function pickFromPool(
+  candidates: Experience[],
+  {
+    experiences = listExperiences(),
+    history = EMPTY_HISTORY,
+    mode = 'usual',
+    excludeId,
+    seenIds = [],
+    random = Math.random,
+    exploreRate = EXPLORE_RATE,
+  }: PoolOptions = {},
+): { experience: Experience; cycled: boolean } | undefined {
   if (candidates.length === 0) return undefined;
 
   const s = summarize(history);
@@ -209,13 +246,102 @@ export function recommendExperience({
 
   const [, group] = weightedPick([...byCategory.entries()], categoryWeight, random);
   const experience = weightedPick(group, (e) => itemWeight(e, s, history, fresh), random);
+  return { experience, cycled: tier >= 2 && seen.size > 0 };
+}
 
-  return {
-    experience,
-    reason: explainRecommendation(experience, { duration, mode, history }),
-    cycled: tier >= 2 && seen.size > 0,
-    candidateCount: candidates.length,
+/* ─── 지금 딱 하나 ─── */
+
+/**
+ * 아무것도 고르지 않아도 바로 시작하기 좋은 경험인지 (기존 메타데이터로만 판단).
+ * 5~15분 · 준비물 1개 이하 · 비용 없음 · 밖에 나가지 않아도 됨 · 혼자 가능(solo 미지정은 가능으로 본다)
+ */
+export const isQuickStart = (e: Experience) =>
+  e.minutes >= 5 && e.minutes <= 15 && e.supplies.length <= 1 && e.cost !== 'low' && e.place !== 'outside' && e.solo !== false;
+
+/** 지금 딱 하나 후보. 부족하면 조건을 조금씩 풀어 안전하게 채운다. */
+export function instantCandidates(pool: Experience[] = listExperiences()): Experience[] {
+  const strict = pool.filter(isQuickStart);
+  if (strict.length >= 3) return strict;
+  const relaxed = pool.filter((e) => e.minutes <= 20 && e.place !== 'outside' && e.supplies.length <= 2);
+  if (relaxed.length) return relaxed;
+  return pool;
+}
+
+export function recommendInstant({
+  experiences = listExperiences(),
+  history = EMPTY_HISTORY,
+  excludeId,
+  seenIds = [],
+  random = Math.random,
+  exploreRate = EXPLORE_RATE,
+}: Omit<PoolOptions, 'mode'> = {}): Recommendation | undefined {
+  const candidates = instantCandidates(experiences);
+  const picked = pickFromPool(candidates, { experiences, history, excludeId, seenIds, random, exploreRate });
+  if (!picked) return undefined;
+  return { ...picked, reason: explainInstant(picked.experience, history), candidateCount: candidates.length };
+}
+
+export function explainInstant(experience: Experience, history: UserHistory = EMPTY_HISTORY): string {
+  const s = summarize(history);
+  if (history.records.length > 0 && !s.completed.has(experience.id)) return '아직 해보지 않은 시간이야.';
+  return `고민할 필요 없어. ${formatMinutes(experience.minutes)}이면 돼.`;
+}
+
+/* ─── 오늘의 OFFROU ─── */
+
+/** 로컬 날짜 'YYYY-MM-DD' */
+export const dayKey = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/** 문자열 → 32비트 해시 (FNV-1a) */
+export function hashString(s: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** 같은 seed면 항상 같은 수열 (mulberry32) */
+export function seededRandom(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/** 하루 중 언제든 해볼 만한 길이 */
+const DAILY_MAX_MINUTES = 30;
+
+/**
+ * 오늘의 OFFROU: 날짜로 정해지는 하나 (같은 날짜·같은 기록이면 항상 같은 결과).
+ * 최근 완료한 것과 어제의 OFFROU는 가능하면 피하고, 취향은 가볍게만 반영한다.
+ */
+export function pickDaily({
+  date,
+  experiences = listExperiences(),
+  history = EMPTY_HISTORY,
+  previousId,
+}: {
+  date: Date;
+  experiences?: Experience[];
+  history?: UserHistory;
+  previousId?: string;
+}): Experience | undefined {
+  const pool = experiences.filter((e) => e.minutes <= DAILY_MAX_MINUTES);
+  const candidates = pool.filter((e) => e.id !== previousId);
+  // 최근 추천(recentShown)은 하루 안에서도 바뀌므로 쓰지 않는다 → 같은 날 결과가 흔들리지 않게
+  const stableHistory = { ...history, activity: { ...history.activity, recentShown: [] } };
+  return pickFromPool(candidates.length ? candidates : pool, {
+    experiences,
+    history: stableHistory,
+    random: seededRandom(hashString(`offrou-daily-${dayKey(date)}`)),
+  })?.experience;
 }
 
 /** 2단계 호환: 조건 + 직전 제외만으로 하나를 고른다 */

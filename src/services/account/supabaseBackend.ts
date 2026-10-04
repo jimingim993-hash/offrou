@@ -1,6 +1,16 @@
 import { createClient, type AuthError as SupabaseAuthError, type SupabaseClient, type User } from '@supabase/supabase-js';
 import { AccountError, isNetworkError, type AccountErrorCode } from './errors';
-import { TABLES, pushToRows, rowsToSnapshot, type CompletionRow, type FeedbackRow, type SavedRow, type TasteRow } from './supabaseRows';
+import {
+  TABLES,
+  pushToRows,
+  rowsToSnapshot,
+  type CompletionRow,
+  type CourseRunRow,
+  type FeedbackRow,
+  type SavedCourseRow,
+  type SavedRow,
+  type TasteRow,
+} from './supabaseRows';
 import type { AccountBackend, AuthEvent, AuthUser } from './types';
 
 /**
@@ -126,18 +136,22 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
       async pull() {
         await requireUserId();
         // RLS가 자기 행만 돌려준다
-        const [c, s, f, t] = await Promise.all([
+        const [c, s, f, t, cr, sc] = await Promise.all([
           supabase.from(TABLES.completions).select('*'),
           supabase.from(TABLES.saved).select('*'),
           supabase.from(TABLES.feedback).select('*'),
           supabase.from(TABLES.taste).select('*').maybeSingle(),
+          supabase.from(TABLES.courseRuns).select('*'),
+          supabase.from(TABLES.savedCourses).select('*'),
         ]);
-        for (const r of [c, s, f, t]) if (r.error) fail(r.error);
+        for (const r of [c, s, f, t, cr, sc]) if (r.error) fail(r.error);
         return rowsToSnapshot({
           completions: (c.data ?? []) as CompletionRow[],
           saved: (s.data ?? []) as SavedRow[],
           feedback: (f.data ?? []) as FeedbackRow[],
           taste: (t.data ?? null) as TasteRow | null,
+          courseRuns: (cr.data ?? []) as CourseRunRow[],
+          savedCourses: (sc.data ?? []) as SavedCourseRow[],
         });
       },
 
@@ -150,6 +164,8 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
         if (rows.saved.length) ops.push(supabase.from(TABLES.saved).upsert(rows.saved, { onConflict: 'user_id,experience_id' }));
         if (rows.feedback.length) ops.push(supabase.from(TABLES.feedback).upsert(rows.feedback, { onConflict: 'user_id,record_id' }));
         if (rows.taste) ops.push(supabase.from(TABLES.taste).upsert(rows.taste, { onConflict: 'user_id' }));
+        if (rows.courseRuns.length) ops.push(supabase.from(TABLES.courseRuns).upsert(rows.courseRuns, { onConflict: 'user_id,id' }));
+        if (rows.savedCourses.length) ops.push(supabase.from(TABLES.savedCourses).upsert(rows.savedCourses, { onConflict: 'user_id,id' }));
         for (const r of await Promise.all(ops)) if (r.error) fail(r.error);
       },
     },

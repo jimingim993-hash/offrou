@@ -989,3 +989,15 @@
     transition: none;
   }
 }
+
+.howMore {
+  margin-top: var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+  text-wrap: balance;
+}
+
+.howMore strong {
+  color: var(--color-text);
+}

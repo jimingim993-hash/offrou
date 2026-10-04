@@ -11,6 +11,9 @@ import { ExperiencePlayPage } from '@/features/experience/ExperiencePlayPage';
 import { ExperienceDonePage } from '@/features/experience/ExperienceDonePage';
 import { AccountPage } from '@/features/account/AccountPage';
 import { ResetPasswordPage } from '@/features/account/ResetPasswordPage';
+import { InstantPage } from '@/features/now/InstantPage';
+import { CoursePage } from '@/features/course/CoursePage';
+import { CourseDonePage, CourseNextPage } from '@/features/course/CourseStepPages';
 import { APP_BASE } from './paths';
 
 // 공식 홈페이지는 따로 불러온다 → 서비스(/app) 코드와 섞이지 않는 별도 chunk
@@ -43,6 +46,10 @@ export const routes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: 'ready', element: <ReadyPage /> },
+      { path: 'now', element: <InstantPage /> },
+      { path: 'course', element: <CoursePage /> },
+      { path: 'course/next', element: <CourseNextPage /> },
+      { path: 'course/done', element: <CourseDonePage /> },
       { path: 'discover', element: <DiscoverPage /> },
       { path: 'discover/:categoryId', element: <DiscoverPage /> },
       { path: 'experience/:experienceId', element: <ExperienceDetailPage /> },

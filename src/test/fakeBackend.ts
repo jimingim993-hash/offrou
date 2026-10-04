@@ -1,11 +1,15 @@
 import { AccountError } from '@/services/account/errors';
 import {
   fromCompletionRow,
+  fromCourseRunRow,
   fromFeedbackRow,
+  fromSavedCourseRow,
   fromSavedRow,
   pushToRows,
   type CompletionRow,
+  type CourseRunRow,
   type FeedbackRow,
+  type SavedCourseRow,
   type SavedRow,
   type TasteRow,
 } from '@/services/account/supabaseRows';
@@ -31,6 +35,8 @@ interface UserTables {
   saved: Map<string, SavedRow>;
   feedback: Map<string, FeedbackRow>;
   taste: TasteRow | null;
+  courseRuns: Map<string, CourseRunRow>;
+  savedCourses: Map<string, SavedCourseRow>;
 }
 
 const SESSION_KEY = 'fake-auth-session';
@@ -46,7 +52,7 @@ export class FakeServer {
   tablesFor(userId: string): UserTables {
     let t = this.tables.get(userId);
     if (!t) {
-      t = { completions: new Map(), saved: new Map(), feedback: new Map(), taste: null };
+      t = { completions: new Map(), saved: new Map(), feedback: new Map(), taste: null, courseRuns: new Map(), savedCourses: new Map() };
       this.tables.set(userId, t);
     }
     return t;
@@ -60,6 +66,8 @@ export class FakeServer {
       saved: [...t.saved.values()].map(fromSavedRow),
       feedback: [...t.feedback.values()].map(fromFeedbackRow),
       activity: { ...EMPTY_SNAPSHOT.activity, ...(t.taste?.data ?? {}) },
+      courseRuns: [...t.courseRuns.values()].map(fromCourseRunRow),
+      savedCourses: [...t.savedCourses.values()].map(fromSavedCourseRow),
     };
   }
 
@@ -195,6 +203,14 @@ function createFakeDevice(server: FakeServer): AccountBackend & { server: FakeSe
         if (rows.taste) {
           own(rows.taste);
           t.taste = rows.taste;
+        }
+        for (const r of rows.courseRuns) {
+          own(r);
+          t.courseRuns.set(r.id, r);
+        }
+        for (const r of rows.savedCourses) {
+          own(r);
+          t.savedCourses.set(r.id, r);
         }
       },
     },
