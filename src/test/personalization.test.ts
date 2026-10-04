@@ -48,7 +48,7 @@ const history = (
     value,
     at: r.completedAt,
   })),
-  activity: { recentShown, skipped: {}, started: {} },
+  activity: { recentShown, skipped: {}, started: {}, recentViewed: [] },
 });
 
 /** 여러 번 추천해서 카테고리 비율을 센다 */
@@ -130,13 +130,16 @@ describe('추천 엔진: 반복 방지와 fallback', () => {
     const h = history([rec('rest-window', 0)]);
     const random = seeded(1);
     for (let i = 0; i < 100; i++) {
-      expect(recommendExperience({ mood: 'rest', duration: dur('5m'), history: h, random })!.experience.id).toBe('rest-ten-breaths');
+      expect(recommendExperience({ mood: 'rest', duration: dur('5m'), history: h, random })!.experience.id).not.toBe('rest-window');
     }
   });
 
   it('최근 추천된 경험도 우선 제외한다', () => {
     const h = history([], [], ['rest-ten-breaths']);
-    expect(recommendExperience({ mood: 'rest', duration: dur('5m'), history: h })!.experience.id).toBe('rest-window');
+    const random = seeded(4);
+    for (let i = 0; i < 100; i++) {
+      expect(recommendExperience({ mood: 'rest', duration: dur('5m'), history: h, random })!.experience.id).not.toBe('rest-ten-breaths');
+    }
   });
 
   it('세션 안에서는 후보를 한 바퀴 다 보여준 뒤에만 순환한다', () => {
@@ -160,7 +163,17 @@ describe('추천 엔진: 반복 방지와 fallback', () => {
     const ids = findCandidates('out', dur('5m')).map((e) => e.id);
     const h = history(ids.map((id) => rec(id, 0)), [], ids);
     const r = recommendExperience({ mood: 'out', duration: dur('5m'), history: h, seenIds: ids, excludeId: ids[0] });
-    expect(r?.experience.id).toBe(ids[0]);
+    expect(ids).toContain(r?.experience.id);
+    // 후보가 딱 하나면 직전 것이라도 그대로 준다
+    const one = recommendExperience({
+      mood: 'out',
+      duration: dur('5m'),
+      experiences: [getExperience(ids[0])!],
+      history: h,
+      seenIds: ids,
+      excludeId: ids[0],
+    });
+    expect(one?.experience.id).toBe(ids[0]);
   });
 
   it('후보가 없으면 undefined (화면은 안내를 보여준다)', () => {
@@ -290,7 +303,7 @@ describe('로컬 저장소', () => {
     expect(getRecords()).toEqual([]);
     expect(getFeedback()).toEqual([]);
     expect(getSaved()).toEqual([]);
-    expect(getActivity()).toEqual({ recentShown: [], skipped: {}, started: {} });
+    expect(getActivity()).toEqual({ recentShown: [], skipped: {}, started: {}, recentViewed: [] });
     expect(getSessionSeen('k')).toEqual([]);
     expect(localStorage.getItem('other-app')).toBe('keep'); // 다른 데이터는 건드리지 않는다
   });

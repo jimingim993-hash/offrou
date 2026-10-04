@@ -236,3 +236,16 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
+
+.about {
+  margin-top: var(--space-2);
+  text-align: center;
+  font-size: var(--text-xs);
+}
+
+.about a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-muted);
+}

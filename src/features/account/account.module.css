@@ -1,0 +1,277 @@
+/* MY 상단 계정 카드 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.cardTitle {
+  font-weight: 700;
+}
+
+.cardText {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.cardButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.cardAction,
+.cardSecondary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+}
+
+.cardAction {
+  align-self: flex-start;
+  color: var(--color-text-on-primary);
+  background: var(--brand-primary);
+}
+
+.cardSecondary {
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+
+.cardLink {
+  align-self: flex-start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+  border-radius: var(--radius-md);
+}
+
+.noticeClose {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.sync {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.syncWarn {
+  color: var(--color-text);
+}
+
+/* 계정 화면 */
+.form,
+.settings,
+.done {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.done {
+  align-items: center;
+  text-align: center;
+  padding-top: var(--space-8);
+}
+
+.doneSymbol {
+  font-size: 2.5rem;
+}
+
+.loading {
+  min-height: 50dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  color: var(--color-text-muted);
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  color: var(--brand-primary);
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.lead {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.formError {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+}
+
+.success {
+  font-size: var(--text-sm);
+  color: var(--brand-primary);
+}
+
+.switches {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.quietLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-text-muted);
+}
+
+.settingsHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.email {
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.textButton {
+  min-height: 44px;
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.sectionTitle {
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.settingsActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.dangerLink {
+  min-height: 44px;
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.dangerButton {
+  width: 100%;
+  min-height: var(--touch-min);
+  font-weight: 700;
+  color: var(--color-danger);
+  background: transparent;
+  border: 1.5px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.dangerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 44px;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--brand-primary);
+}

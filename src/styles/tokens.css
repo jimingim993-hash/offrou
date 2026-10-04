@@ -5,7 +5,7 @@
  */
 :root {
   /* Brand (임시) */
-  --brand-primary: #5e8c7e;        /* 차분한 세이지 그린 */
+  --brand-primary: #466c60;        /* 차분한 세이지 그린 (흰 글자·밝은 배경 위 글자 모두 WCAG AA 4.5:1 이상) */
   --brand-primary-soft: #e3ece7;
   --brand-accent: #e3a57a;         /* 해질녘 살구빛 */
   --brand-accent-soft: #f6e6da;
@@ -16,12 +16,13 @@
   --color-surface-pressed: #f1eadf;
   --color-border: #e7dfd2;
   --color-text: #2f2b27;
-  --color-text-muted: #7a7168;
+  --color-text-muted: #716860; /* 배경 대비 4.5:1 이상 */
   --color-text-on-primary: #ffffff;
   --color-selected-bg: var(--brand-primary-soft);
   --color-selected-border: var(--brand-primary);
   --color-nav-bg: rgba(255, 252, 247, 0.88);
   --color-focus: var(--brand-primary);
+  --color-danger: #b3432f;
 
   /* REST 실행 화면 배경 */
   --rest-sky: #dce8ee;
@@ -84,7 +85,9 @@
     --color-text-muted: #a8a097;
     --color-text-on-primary: #1e1d22;
     --color-nav-bg: rgba(40, 39, 45, 0.88);
-    --rest-sky: #22303a;
+    --color-danger: #f0a08f;
+    --color-danger: #f0a08f;
+  --rest-sky: #22303a;
     --rest-dusk: #3a2d28;
     --rest-night: #25233a;
     --rest-warm: #38301f;

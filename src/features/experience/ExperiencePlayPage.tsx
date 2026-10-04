@@ -33,7 +33,7 @@ export function ExperiencePlayPage() {
     noteStarted(experience.id);
   }, [experience]);
 
-  if (!experience) return <Navigate to="/" replace />;
+  if (!experience) return <Navigate to="/app" replace />;
 
   const category = CATEGORIES.find((c) => c.id === experience.categoryId);
   const Runner = getRunner(experience);

@@ -10,7 +10,7 @@ export const readySearch = (mood: MoodId, duration: DurationId, pick?: string, m
   new URLSearchParams({ mood, time: duration, ...(pick && { pick }), ...(mode === 'fresh' && { fresh: '1' }) });
 
 export const buildReadyPath = (mood: MoodId, duration: DurationId) =>
-  `/ready?${readySearch(mood, duration).toString()}`;
+  `/app/ready?${readySearch(mood, duration).toString()}`;
 
 export const parseReadyParams = (params: URLSearchParams) => ({
   mood: findMood(params.get('mood')),

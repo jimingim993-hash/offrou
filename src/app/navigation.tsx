@@ -40,7 +40,7 @@ export interface NavItem {
 
 /** 하단 내비게이션 항목. 메뉴 추가 시 여기만 수정한다. */
 export const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'HOME', Icon: HomeIcon, end: true },
-  { to: '/discover', label: '발견', Icon: CompassIcon },
-  { to: '/my', label: 'MY', Icon: MyIcon },
+  { to: '/app', label: 'HOME', Icon: HomeIcon, end: true },
+  { to: '/app/discover', label: '발견', Icon: CompassIcon },
+  { to: '/app/my', label: 'MY', Icon: MyIcon },
 ];

@@ -18,7 +18,7 @@ export function ExperienceDonePage() {
   const result = (useLocation().state ?? {}) as DoneState;
   const experience = getExperience(experienceId);
 
-  if (!experience) return <Navigate to="/" replace />;
+  if (!experience) return <Navigate to="/app" replace />;
 
   return (
     <div className={styles.done}>
@@ -27,10 +27,10 @@ export function ExperienceDonePage() {
       {result.endingTitle && <p className={styles.ending}>“{result.endingTitle}”</p>}
       <p className={styles.message}>{result.message ?? experience.doneMessage}</p>
       <div className={styles.actions}>
-        <Button block onClick={() => navigate('/')}>
+        <Button block onClick={() => navigate('/app')}>
           HOME으로 돌아가기
         </Button>
-        <Button block variant="ghost" onClick={() => navigate('/my')}>
+        <Button block variant="ghost" onClick={() => navigate('/app/my')}>
           MY OFFROU 보기
         </Button>
       </div>

@@ -48,7 +48,7 @@ export function ReadyPage() {
   if (!mood || !duration) {
     return (
       <EmptyState symbol="🧭" title="어떤 시간이 필요한지 먼저 골라줘." description="HOME에서 다시 시작할 수 있어.">
-        <Button onClick={() => navigate('/')}>HOME으로</Button>
+        <Button onClick={() => navigate('/app')}>HOME으로</Button>
       </EmptyState>
     );
   }

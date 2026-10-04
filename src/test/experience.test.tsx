@@ -38,14 +38,14 @@ async function playStory(user: User, story: InteractiveStory, pick = 0) {
 describe('EXPERIENCE 인터랙티브', () => {
   it.each(STORIES.map((s) => [s.title, s] as const))('%s: 처음부터 결말까지 진행하고 MY에 결말이 남는다', async (_, story) => {
     const user = userEvent.setup();
-    const router = renderAt(`/experience/${story.experienceId}/play`);
+    const router = renderAt(`/app/experience/${story.experienceId}/play`);
 
     expect(screen.getByText(story.subtitle)).toBeInTheDocument();
     await playStory(user, story);
     expect(screen.getByText('오늘의 이야기')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
-    expect(router.state.location.pathname).toBe(`/experience/${story.experienceId}/done`);
+    expect(router.state.location.pathname).toBe(`/app/experience/${story.experienceId}/done`);
 
     const record = getRecords()[0];
     expect(record).toMatchObject({ experienceId: story.experienceId, kind: 'story' });
@@ -59,7 +59,7 @@ describe('EXPERIENCE 인터랙티브', () => {
 
   it('진행 표시가 장면마다 바뀐다', async () => {
     const user = userEvent.setup();
-    renderAt('/experience/exp-radio-dj/play');
+    renderAt('/app/experience/exp-radio-dj/play');
     await user.click(screen.getByRole('button', { name: '시작하기' }));
     expect(screen.getByRole('img', { name: '1 / 5' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '"오늘 하루도 수고했어요."' }));
@@ -68,7 +68,7 @@ describe('EXPERIENCE 인터랙티브', () => {
 
   it('선택에 따라 다음 장면의 대사가 달라진다', async () => {
     const user = userEvent.setup();
-    renderAt('/experience/exp-strange-city/play');
+    renderAt('/app/experience/exp-strange-city/play');
     await user.click(screen.getByRole('button', { name: '시작하기' }));
     await user.click(screen.getByRole('button', { name: '북적이는 시장' }));
     expect(screen.getByText(/과일 가게 주인/)).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('EXPERIENCE 인터랙티브', () => {
   it('처음부터 다시 하고 다른 선택을 하면 다른 결말에 도착한다', async () => {
     const user = userEvent.setup();
     const story = STORIES.find((s) => s.experienceId === 'exp-detective')!;
-    renderAt('/experience/exp-detective/play');
+    renderAt('/app/experience/exp-detective/play');
     const endingTitle = () => screen.getByText('오늘의 이야기').nextElementSibling?.textContent;
 
     await playStory(user, story, 0);
@@ -111,7 +111,7 @@ describe('EXPERIENCE 인터랙티브', () => {
     const orig = exp.interaction;
     exp.interaction = { type: 'story', storyId: 'nope' };
     try {
-      renderAt('/experience/exp-bookstore/play');
+      renderAt('/app/experience/exp-bookstore/play');
       expect(screen.getByText('이야기가 잠깐 길을 잃었어.')).toBeInTheDocument();
     } finally {
       exp.interaction = orig;
@@ -121,14 +121,14 @@ describe('EXPERIENCE 인터랙티브', () => {
 
 describe('나가기', () => {
   it('진행 중에는 하단 내비 대신 나가기가 보인다', () => {
-    renderAt('/experience/rest-window/play');
+    renderAt('/app/experience/rest-window/play');
     expect(screen.queryByRole('navigation', { name: '주요 메뉴' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /나가기/ })).toBeInTheDocument();
   });
 
   it('그냥 나가면 이전 화면으로 돌아가고 기록은 남지 않는다', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/experience/exp-small-hotel', '/experience/exp-small-hotel/play');
+    const router = renderAt('/app/experience/exp-small-hotel', '/app/experience/exp-small-hotel/play');
     await user.click(screen.getByRole('button', { name: '시작하기' }));
     await user.click(screen.getByRole('button', { name: /나가기/ }));
 
@@ -136,21 +136,21 @@ describe('나가기', () => {
     expect(within(dialog).getByText('여기까지만 해도 괜찮아.')).toBeInTheDocument();
     await user.click(within(dialog).getByRole('button', { name: '그냥 나가기' }));
 
-    expect(router.state.location.pathname).toBe('/experience/exp-small-hotel');
+    expect(router.state.location.pathname).toBe('/app/experience/exp-small-hotel');
     expect(getRecords()).toHaveLength(0);
   });
 
   it('바로 들어온 경우엔 경험 상세로 나간다', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/experience/play-doodle/play');
+    const router = renderAt('/app/experience/play-doodle/play');
     await user.click(screen.getByRole('button', { name: /나가기/ }));
     await user.click(screen.getByRole('button', { name: '그냥 나가기' }));
-    expect(router.state.location.pathname).toBe('/experience/play-doodle');
+    expect(router.state.location.pathname).toBe('/app/experience/play-doodle');
   });
 
   it('계속할래를 누르면 그대로 이어간다', async () => {
     const user = userEvent.setup();
-    renderAt('/experience/exp-radio-dj/play');
+    renderAt('/app/experience/exp-radio-dj/play');
     await user.click(screen.getByRole('button', { name: /나가기/ }));
     await user.click(screen.getByRole('button', { name: '계속할래' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -162,17 +162,17 @@ describe('다시 경험하기', () => {
   it('MY → 경험 상세에서 다시 시작할 수 있다', async () => {
     const user = userEvent.setup();
     const story = STORIES.find((s) => s.experienceId === 'exp-detective')!;
-    const router = renderAt('/experience/exp-detective/play');
+    const router = renderAt('/app/experience/exp-detective/play');
     await playStory(user, story);
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
     await user.click(screen.getByRole('button', { name: 'MY OFFROU 보기' }));
 
     await user.click(screen.getByRole('link', { name: /동네 탐정/ }));
-    expect(router.state.location.pathname).toBe('/experience/exp-detective');
+    expect(router.state.location.pathname).toBe('/app/experience/exp-detective');
     expect(screen.getByText('다른 선택을 하면, 다른 하루가 될 수도 있어.')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '다시 경험하기' }));
-    expect(router.state.location.pathname).toBe('/experience/exp-detective/play');
+    expect(router.state.location.pathname).toBe('/app/experience/exp-detective/play');
     await playStory(user, story, 1);
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
 
@@ -185,7 +185,7 @@ describe('다시 경험하기', () => {
 describe('카테고리별 실행 화면', () => {
   it('REST: 문장과 선택형 타이머, 마치기', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/experience/rest-window/play');
+    const router = renderAt('/app/experience/rest-window/play');
     expect(screen.getByText('잠깐 창밖을 바라봐.')).toBeInTheDocument();
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
 
@@ -195,13 +195,13 @@ describe('카테고리별 실행 화면', () => {
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
-    expect(router.state.location.pathname).toBe('/experience/rest-window/done');
+    expect(router.state.location.pathname).toBe('/app/experience/rest-window/done');
     expect(getRecords()[0].kind).toBe('rest');
   });
 
   it('PLAY: 할 일을 하나씩 건네고 마지막 대답으로 완료', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/experience/play-color-hunt/play');
+    const router = renderAt('/app/experience/play-color-hunt/play');
     expect(screen.getByText(/지금 주변에서 (파란색|노란색|초록색|빨간색|하얀색) 물건 5개를 찾아봐\./)).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '1 / 3' })).toBeInTheDocument();
 
@@ -209,11 +209,11 @@ describe('카테고리별 실행 화면', () => {
     expect(screen.getByText('이번엔 그중 가장 마음에 드는 하나를 골라봐.')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '골랐어' }));
     await user.click(screen.getByRole('button', { name: '생각해봤어' }));
-    expect(router.state.location.pathname).toBe('/experience/play-color-hunt/done');
+    expect(router.state.location.pathname).toBe('/app/experience/play-color-hunt/done');
   });
 
   it('HOBBY: 오늘의 주제와 준비물을 보여주고 바로 시작', () => {
-    renderAt('/experience/hobby-drawing/play');
+    renderAt('/app/experience/hobby-drawing/play');
     expect(screen.getByText('오늘 그릴 것')).toBeInTheDocument();
     const exp = getExperience('hobby-drawing')!;
     const subjects = exp.interaction?.type === 'focus' ? exp.interaction.subjects : [];
@@ -223,7 +223,7 @@ describe('카테고리별 실행 화면', () => {
   });
 
   it('OUT: 예상 시간·비용·혼자 가능·준비물을 보여준다', () => {
-    renderAt('/experience/out-new-route');
+    renderAt('/app/experience/out-new-route');
     const meta = screen.getByRole('list', { name: '경험 정보' });
     for (const text of ['약 10분', '비용 없음', '혼자 가능', '준비물 · 편한 신발']) {
       expect(within(meta).getByText(text)).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe('카테고리별 실행 화면', () => {
   });
 
   it('OUT: 비용이 드는 경험은 비용 조금으로 표시', () => {
-    renderAt('/experience/out-new-menu');
+    renderAt('/app/experience/out-new-menu');
     expect(screen.getByText('비용 조금')).toBeInTheDocument();
   });
 
@@ -239,7 +239,7 @@ describe('카테고리별 실행 화면', () => {
     for (const c of CATEGORIES) {
       for (const e of getExperiencesByCategory(c.id)) {
         const { unmount } = render(
-          <RouterProvider router={createMemoryRouter(routes, { initialEntries: [`/experience/${e.id}/play`] })} />,
+          <RouterProvider router={createMemoryRouter(routes, { initialEntries: [`/app/experience/${e.id}/play`] })} />,
         );
         expect(screen.getByRole('heading', { level: 1, name: e.title })).toBeInTheDocument();
         unmount();

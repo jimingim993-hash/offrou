@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useStoreVersion } from '@/hooks/useStoreVersion';
 import { getRecords } from '@/services/records';
 import { getSaved } from '@/services/saved';
@@ -7,6 +7,7 @@ import { MyOverview } from './MyOverview';
 import { RecordList } from './RecordList';
 import { SavedList } from './SavedList';
 import { ResetData } from './ResetData';
+import { AccountCard } from '@/features/account/AccountCard';
 import styles from './MyPage.module.css';
 
 const TABS = [
@@ -26,6 +27,8 @@ export function MyPage() {
   return (
     <>
       <PageHeader eyebrow="MY OFFROU" title="내가 보낸 시간들" />
+
+      <AccountCard />
 
       {records.length > 0 && <MyOverview records={records} />}
 
@@ -52,6 +55,11 @@ export function MyPage() {
       </div>
 
       <ResetData />
+
+      {/* 공식 홈페이지로 가는 작은 진입점 (서비스 사용 중에는 눈에 띄지 않게) */}
+      <p className={styles.about}>
+        <Link to="/">OFFROU 소개</Link>
+      </p>
     </>
   );
 }

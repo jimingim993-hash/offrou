@@ -22,6 +22,9 @@ const createId = () =>
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
+/** 동기화용: 기록 전체를 바꾼다 (병합 결과 반영) */
+export const replaceRecords = (records: OffrouRecord[]) => writeJson(STORAGE_KEYS.records, records);
+
 /** 이 경험을 완료한 적이 있는지 (다시 경험하기 표시용) */
 export const hasRecord = (experienceId: string) => read().some((r) => r.experienceId === experienceId);
 

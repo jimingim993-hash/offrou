@@ -1,0 +1,67 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  font: inherit;
+  font-size: var(--text-md);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.input:focus-visible {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-primary-soft);
+}
+
+/* 브라우저 기본 비밀번호 보기 버튼은 숨긴다 (직접 만든 보기 버튼과 겹침) */
+.input::-ms-reveal,
+.input::-ms-clear {
+  display: none;
+}
+
+.control:has(.reveal) .input {
+  padding-right: 76px;
+}
+
+.invalid {
+  border-color: var(--color-danger);
+}
+
+.reveal {
+  position: absolute;
+  right: 4px;
+  min-width: 64px;
+  min-height: 44px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+}

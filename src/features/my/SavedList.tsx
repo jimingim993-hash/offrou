@@ -17,8 +17,8 @@ export function SavedList({ saved }: { saved: SavedItem[] }) {
 
   if (items.length === 0) {
     return (
-      <EmptyState symbol="♡" title="아직 저장한 시간이 없어." description="발견에서 나중에 해보고 싶은 시간을 ♡로 남겨둘 수 있어.">
-        <Button variant="ghost" onClick={() => navigate('/discover')}>
+      <EmptyState symbol="♡" title="아직 저장해둔 시간이 없어." description="발견하다 마음에 드는 시간이 있으면 ♡를 눌러봐.">
+        <Button variant="ghost" onClick={() => navigate('/app/discover')}>
           발견 둘러보기
         </Button>
       </EmptyState>

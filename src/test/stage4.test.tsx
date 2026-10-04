@@ -21,7 +21,7 @@ const pickOf = (router: ReturnType<typeof renderAt>['router']) =>
 describe('완료 후 가벼운 피드백', () => {
   it('좋았어 / 그냥 그랬어를 남기고 바꿀 수 있다', async () => {
     const user = userEvent.setup();
-    renderAt('/experience/rest-window/play');
+    renderAt('/app/experience/rest-window/play');
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
 
     expect(screen.getByText('이 시간은 어땠어?')).toBeInTheDocument();
@@ -36,18 +36,18 @@ describe('완료 후 가벼운 피드백', () => {
 
   it('피드백 없이 HOME으로 돌아갈 수 있다', async () => {
     const user = userEvent.setup();
-    const { router } = renderAt('/experience/play-doodle/play');
+    const { router } = renderAt('/app/experience/play-doodle/play');
     await user.click(screen.getByRole('button', { name: /나가기/ }));
     await user.click(screen.getByRole('button', { name: '여기까지 하고 마치기' }));
     await user.click(screen.getByRole('button', { name: 'HOME으로 돌아가기' }));
-    expect(router.state.location.pathname).toBe('/');
+    expect(router.state.location.pathname).toBe('/app');
     expect(getRecords()).toHaveLength(1);
     expect(getFeedback()).toHaveLength(0);
   });
 
   it('EXPERIENCE도 결말과 함께 피드백을 남길 수 있다 (선택 내용은 저장하지 않음)', async () => {
     const user = userEvent.setup();
-    renderAt('/experience/exp-detective/play');
+    renderAt('/app/experience/exp-detective/play');
     await user.click(screen.getByRole('button', { name: '시작하기' }));
     await user.click(screen.getByRole('button', { name: '다음' }));
     await user.click(screen.getByRole('button', { name: '영수증' }));
@@ -64,13 +64,13 @@ describe('완료 후 가벼운 피드백', () => {
 
 describe('추천 결과', () => {
   it('짧은 추천 이유를 보여준다', async () => {
-    renderAt('/ready?mood=rest&time=10m');
+    renderAt('/app/ready?mood=rest&time=10m');
     expect(await screen.findByText('지금 10분이면 충분해.')).toBeInTheDocument();
   });
 
   it('다른 시간 보기를 계속 눌러도 후보를 한 바퀴 돌기 전엔 겹치지 않는다', async () => {
     const user = userEvent.setup();
-    const { router } = renderAt('/ready?mood=rest&time=10m');
+    const { router } = renderAt('/app/ready?mood=rest&time=10m');
     await screen.findByRole('button', { name: '이 시간 시작하기' });
     const total = candidatesFor('rest', findDuration('10m')!).length;
 
@@ -90,7 +90,7 @@ describe('추천 결과', () => {
     const user = userEvent.setup();
     addRecord(getExperience('rest-window')!);
     addRecord(getExperience('rest-two-songs')!);
-    const { router } = renderAt('/ready?mood=rest&time=10m');
+    const { router } = renderAt('/app/ready?mood=rest&time=10m');
 
     await user.click(await screen.findByRole('button', { name: /평소와 조금 다른 걸 해볼래/ }));
     expect(new URLSearchParams(router.state.location.search).get('fresh')).toBe('1');
@@ -99,7 +99,7 @@ describe('추천 결과', () => {
   });
 
   it('처음 방문한 사용자에게는 제안하지 않는다', async () => {
-    renderAt('/ready?mood=rest&time=10m');
+    renderAt('/app/ready?mood=rest&time=10m');
     await screen.findByRole('button', { name: '이 시간 시작하기' });
     expect(screen.queryByRole('button', { name: /평소와 조금 다른 걸 해볼래/ })).not.toBeInTheDocument();
   });
@@ -108,7 +108,7 @@ describe('추천 결과', () => {
 describe('♡ 저장', () => {
   it('상세에서 저장 → MY 저장한 시간에 보이고, 취소하면 사라진다', async () => {
     const user = userEvent.setup();
-    const { router, unmount } = renderAt('/experience/out-sky');
+    const { router, unmount } = renderAt('/app/experience/out-sky');
     const save = screen.getByRole('button', { name: '저장' });
     await user.click(save);
     expect(screen.getByRole('button', { name: '저장됨' })).toHaveAttribute('aria-pressed', 'true');
@@ -116,21 +116,21 @@ describe('♡ 저장', () => {
 
     // 새로고침해도 유지
     unmount();
-    renderAt('/my?tab=saved');
+    renderAt('/app/my?tab=saved');
     expect(screen.getByRole('tab', { name: /저장한 시간/ })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('문 밖에서 하늘 보기')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '문 밖에서 하늘 보기 저장됨' }));
-    expect(screen.getByText('아직 저장한 시간이 없어.')).toBeInTheDocument();
+    expect(screen.getByText('아직 저장해둔 시간이 없어.')).toBeInTheDocument();
     expect(getSaved()).toEqual([]);
     expect(router).toBeDefined();
   });
 
   it('발견 목록에서도 바로 저장할 수 있다', async () => {
     const user = userEvent.setup();
-    const { router } = renderAt('/discover/hobby');
+    const { router } = renderAt('/app/discover/hobby');
     await user.click(screen.getByRole('button', { name: '10분 드로잉 저장' }));
-    expect(router.state.location.pathname).toBe('/discover/hobby'); // 저장만 하고 이동하지 않음
+    expect(router.state.location.pathname).toBe('/app/discover/hobby'); // 저장만 하고 이동하지 않음
     expect(screen.getByRole('button', { name: '10분 드로잉 저장됨' })).toBeInTheDocument();
   });
 });
@@ -138,7 +138,7 @@ describe('♡ 저장', () => {
 describe('MY OFFROU', () => {
   it('이번 달 횟수 · 카테고리별 횟수 · 자주 보낸 시간', () => {
     for (const id of ['rest-window', 'exp-radio-dj', 'rest-two-songs', 'exp-detective']) addRecord(getExperience(id)!);
-    renderAt('/my');
+    renderAt('/app/my');
     expect(screen.getByText(/이번 달, 다른 시간을/).textContent).toBe('이번 달, 다른 시간을 4번 보냈어.');
     const counts = screen.getByRole('list', { name: '이번 달 카테고리별 횟수' });
     expect(within(counts).getAllByRole('listitem').map((li) => li.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
@@ -151,12 +151,12 @@ describe('MY OFFROU', () => {
 
   it('기록이 적으면 취향 대신 안내만 보여준다', () => {
     addRecord(getExperience('rest-window')!);
-    renderAt('/my');
+    renderAt('/app/my');
     expect(screen.getByText('조금 더 여러 시간을 보내보면 여기에 네 취향이 보여.')).toBeInTheDocument();
   });
 
   it('기록이 없으면 기존 빈 상태 그대로', () => {
-    renderAt('/my');
+    renderAt('/app/my');
     expect(screen.getByText('아직 남겨진 시간이 없어.')).toBeInTheDocument();
     expect(screen.queryByText(/이번 달/)).not.toBeInTheDocument();
   });
@@ -169,7 +169,7 @@ describe('내 OFFROU 기록 초기화', () => {
     addRecord(getExperience('rest-two-songs')!);
     setFeedback(r, 'good');
     toggleSaved('out-sky');
-    const { unmount } = renderAt('/my');
+    const { unmount } = renderAt('/app/my');
 
     await user.click(screen.getByRole('button', { name: '내 OFFROU 기록 초기화' }));
     const dialog = screen.getByRole('dialog', { name: '내 OFFROU 기록을 모두 지울까?' });
@@ -187,7 +187,7 @@ describe('내 OFFROU 기록 초기화', () => {
 
     // 신규 사용자처럼 추천받는다
     unmount();
-    renderAt('/ready?mood=rest&time=10m');
+    renderAt('/app/ready?mood=rest&time=10m');
     expect(await screen.findByText('지금 10분이면 충분해.')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /평소와 조금 다른 걸 해볼래/ })).not.toBeInTheDocument();
   });

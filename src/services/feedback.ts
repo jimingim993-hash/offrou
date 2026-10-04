@@ -33,3 +33,7 @@ export function setFeedback(
 export const getFeedbackFor = (recordId: string): FeedbackValue | undefined => read()[recordId]?.value;
 
 export const getFeedback = (): FeedbackEntry[] => Object.values(read());
+
+/** 동기화용: 피드백 전체를 바꾼다 */
+export const replaceFeedback = (entries: FeedbackEntry[]) =>
+  writeJson(STORAGE_KEYS.feedback, Object.fromEntries(entries.map((e) => [e.recordId, e])));

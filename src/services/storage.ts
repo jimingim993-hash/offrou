@@ -11,6 +11,10 @@ export const STORAGE_KEYS = {
   feedback: 'offrou.feedback.v1',
   saved: 'offrou.saved.v1',
   activity: 'offrou.activity.v1',
+  /** 이 기기의 기록이 연결된 계정 (비회원이면 없음) */
+  account: 'offrou.account.v1',
+  /** '새로 시작하기'를 고를 때 따로 보관해 둔 비회원 기록 (자동 삭제하지 않는다) */
+  guestBackup: 'offrou.guest-backup.v1',
   /** sessionStorage: 지금 추천 세션에서 이미 보여준 경험 */
   session: 'offrou.session.v1',
 } as const;
@@ -52,12 +56,15 @@ export function writeJson(key: string, value: unknown, storage: Storage = localS
   emit();
 }
 
-/** 이 기기에 남은 OFFROU 데이터를 모두 지운다 → 처음 방문한 상태로 */
-export function resetAllData() {
+/**
+ * 이 기기에 남은 OFFROU 데이터를 지운다 → 처음 방문한 상태로.
+ * 서버(계정) 데이터는 건드리지 않는다. keep에 든 키는 남긴다 (예: 계정 연결 정보).
+ */
+export function resetAllData({ keep = [] }: { keep?: string[] } = {}) {
   for (const storage of [localStorage, sessionStorage]) {
     try {
       const keys = Array.from({ length: storage.length }, (_, i) => storage.key(i)).filter(
-        (k): k is string => !!k && k.startsWith(STORAGE_PREFIX),
+        (k): k is string => !!k && k.startsWith(STORAGE_PREFIX) && !keep.includes(k),
       );
       for (const k of keys) storage.removeItem(k);
     } catch {

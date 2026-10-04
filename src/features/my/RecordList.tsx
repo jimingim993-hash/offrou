@@ -30,7 +30,7 @@ export function RecordList({ records }: { records: OffrouRecord[] }) {
   if (records.length === 0) {
     return (
       <EmptyState symbol="🍃" title="아직 남겨진 시간이 없어." description="첫 번째 OFFROU를 경험하면 여기에 하나씩 쌓일 거야.">
-        <Button onClick={() => navigate('/')}>첫 OFFROU 시작하기</Button>
+        <Button onClick={() => navigate('/app')}>첫 OFFROU 시작하기</Button>
       </EmptyState>
     );
   }

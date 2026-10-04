@@ -102,9 +102,8 @@ describe('추천 엔진', () => {
   });
 
   it('후보가 하나뿐이면 그 하나를 안전하게 다시 준다', () => {
-    const only = findCandidates('out', dur('5m'));
-    expect(only).toHaveLength(1);
-    expect(recommend({ mood: 'out', duration: dur('5m'), excludeId: only[0].id })?.id).toBe(only[0].id);
+    const only = findCandidates('out', dur('5m')).slice(0, 1);
+    expect(recommend({ mood: 'out', duration: dur('5m'), excludeId: only[0].id, pool: only })?.id).toBe(only[0].id);
   });
 
   it('후보가 없으면 undefined', () => {

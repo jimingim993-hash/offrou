@@ -1,9 +1,10 @@
 /*
- * OFFROU Service Worker (1단계: 기본 구조)
+ * OFFROU Service Worker
  * - 앱 셸(HTML)은 network-first, 정적 자산은 cache-first.
+ * - 7단계: 공식 홈페이지('/')와 서비스('/app')가 같은 index.html을 쓴다 → 오프라인에서도 두 경로 모두 앱 셸로 열린다.
  * - 오프라인 고도화/푸시 등은 이후 단계에서 확장한다.
  */
-const CACHE_VERSION = 'offrou-v1';
+const CACHE_VERSION = 'offrou-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon.svg'];
 
 self.addEventListener('install', (event) => {

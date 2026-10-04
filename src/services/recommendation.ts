@@ -25,7 +25,7 @@ import type {
 export const EMPTY_HISTORY: UserHistory = {
   records: [],
   feedback: [],
-  activity: { recentShown: [], skipped: {}, started: {} },
+  activity: { recentShown: [], skipped: {}, started: {}, recentViewed: [] },
 };
 
 /** 탐색 추천 비율 */

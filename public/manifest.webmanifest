@@ -1,18 +1,31 @@
 {
   "name": "OFFROU 오프루",
   "short_name": "OFFROU",
-  "description": "같은 하루에, 다른 시간을.",
+  "description": "같은 하루에, 다른 시간을. 반복되는 하루에서 잠시 벗어나 평소와 다른 시간을 만나보세요.",
   "lang": "ko",
   "id": "/",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F6F1E9",
   "theme_color": "#F6F1E9",
-  "categories": ["lifestyle", "entertainment"],
+  "categories": [
+    "lifestyle",
+    "entertainment"
+  ],
   "icons": [
-    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
   ]
 }

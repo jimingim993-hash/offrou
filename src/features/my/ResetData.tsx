@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Sheet, SheetQuietButton } from '@/components/ui/Sheet';
-import { resetAllData } from '@/services/storage';
+import { STORAGE_KEYS, resetAllData } from '@/services/storage';
+import { useAccount } from '@/features/account/AccountProvider';
 import styles from './MyPage.module.css';
 
-/** 내 OFFROU 기록 초기화. 한 번 더 확인한 뒤 이 기기의 OFFROU 데이터를 모두 지운다. */
+/**
+ * 이 기기의 OFFROU 기록 초기화. 한 번 더 확인한 뒤 이 기기의 데이터만 지운다.
+ * 계정(서버) 데이터는 지우지 않는다 — 계정 삭제는 계정 설정에서 따로 한다.
+ */
 export function ResetData() {
+  const { status } = useAccount();
+  const signedIn = status === 'signedIn';
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -15,13 +21,23 @@ export function ResetData() {
         내 OFFROU 기록 초기화
       </button>
       <p className={styles.resetNote} aria-live="polite">
-        {done ? '모두 지웠어. 처음처럼 다시 시작할 수 있어.' : '기록은 이 기기에만 저장돼.'}
+        {done
+          ? signedIn
+            ? '이 기기의 기록을 지웠어. 계정 기록은 그대로야.'
+            : '모두 지웠어. 처음처럼 다시 시작할 수 있어.'
+          : signedIn
+            ? '이 기기의 기록만 지워져. 계정 삭제와는 달라.'
+            : '기록은 이 기기에만 저장돼.'}
       </p>
 
       {open && (
         <Sheet
           title="내 OFFROU 기록을 모두 지울까?"
-          description="지나온 시간, 저장한 시간, 피드백, 추천 기록이 이 기기에서 사라져. 되돌릴 수 없어."
+          description={
+            signedIn
+              ? '이 기기에 남은 지나온 시간, 저장한 시간, 피드백, 추천 기록이 지워져. 계정에 저장된 기록은 지워지지 않아서, 다시 동기화되면 돌아와.'
+              : '지나온 시간, 저장한 시간, 피드백, 추천 기록이 이 기기에서 사라져. 되돌릴 수 없어.'
+          }
           onClose={() => setOpen(false)}
         >
           <SheetQuietButton onClick={() => setOpen(false)}>그만둘래</SheetQuietButton>
@@ -29,7 +45,8 @@ export function ResetData() {
             block
             variant="ghost"
             onClick={() => {
-              resetAllData();
+              // 로그인 중이면 계정 연결 정보는 남긴다 (서버 데이터는 건드리지 않음)
+              resetAllData(signedIn ? { keep: [STORAGE_KEYS.account] } : undefined);
               setOpen(false);
               setDone(true);
             }}

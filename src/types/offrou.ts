@@ -34,6 +34,10 @@ export interface Category {
   name: string;
   /** 짧은 한 줄 설명 */
   tagline: string;
+  /** 발견 화면에서 코드와 함께 보여주는 한글 설명 (쉬어가는 시간 …) */
+  short: string;
+  /** 공식 홈페이지에서 영역을 소개하는 한 문장 */
+  intro: string;
   symbol: string;
 }
 
@@ -86,6 +90,8 @@ export interface Experience {
   invite: string;
   /** 짧은 설명 */
   summary: string;
+  /** 검색·탐색 보조용 키워드 (화면에 전부 노출하지 않는다) */
+  tags: string[];
   /** 추천 가능한 상태. '아무거나 해볼래'는 모든 경험이 대상이라 따로 적지 않는다. */
   moods: Exclude<MoodId, 'anything'>[];
   /** 예상 소요 시간(분) */
@@ -145,6 +151,8 @@ export interface ActivitySignals {
   skipped: Record<string, number>;
   /** 시작한 횟수 */
   started: Record<string, number>;
+  /** 상세를 열어봤지만 아직 시작하지 않은 경험 (최근 것이 앞, 최대 5개) */
+  recentViewed: string[];
 }
 
 /** 추천 엔진이 참고하는 사용자 기록 묶음 (모두 이 기기 안의 데이터) */
