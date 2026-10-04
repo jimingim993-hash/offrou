@@ -1,5 +1,5 @@
 import type { DurationId, Experience, MoodId, OffrouRecord } from '@/types/offrou';
-import { STORAGE_KEYS, readJson, writeJson } from './storage';
+import { STORAGE_KEYS, readList, writeJson } from './storage';
 
 /**
  * MY OFFROU 기록 저장소.
@@ -15,7 +15,7 @@ const isRecord = (v: unknown): v is OffrouRecord =>
   typeof (v as OffrouRecord).completedAt === 'string';
 
 const read = (): OffrouRecord[] =>
-  readJson<unknown[]>(STORAGE_KEYS.records, [], Array.isArray).filter(isRecord);
+  readList(STORAGE_KEYS.records, isRecord);
 
 const createId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto

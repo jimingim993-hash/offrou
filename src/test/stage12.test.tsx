@@ -349,7 +349,7 @@ describe('추천 · 코스 · 발견 연결', () => {
   it('지금 딱 하나 → REST가 나오면 RestEngine으로 실행', async () => {
     const user = userEvent.setup();
     const router = renderAt('/app/now');
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 90; i++) {
       const link = screen.getByRole('button', { name: '이 시간 시작하기' });
       const pick = new URLSearchParams(router.state.location.search).get('pick');
       if (isRunnableRest(pick ?? undefined)) {
@@ -360,7 +360,7 @@ describe('추천 · 코스 · 발견 연결', () => {
       }
       await user.click(screen.getByRole('button', { name: /다른 거/ }));
     }
-    // 30번 안에 REST가 안 나오면 후보 구성이 잘못된 것
+    // 한 바퀴(후보 수) 안에 REST가 안 나오면 후보 구성이 잘못된 것
     expect.fail('지금 딱 하나에서 실행형 REST가 나오지 않았어');
   });
 

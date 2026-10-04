@@ -88,6 +88,66 @@ const META: Record<string, StoryMeta> = {
     summary: '가방 속 편지 세 통을 주인에게 전하는 오래된 마을의 하루.',
     tags: ['편지', '마을', '산책', '선물'],
   },
+  'exp-last-screening': {
+    symbol: '🎞️',
+    invite: '작은 영화관의 마지막 상영을 준비해봐.',
+    summary: '포스터를 걸고 손님을 맞고 불을 낮추는, 좌석 마흔 개 영화관의 밤.',
+    tags: ['영화', '밤', '손님', '극장'],
+  },
+  'exp-dawn-store': {
+    symbol: '🏪',
+    invite: '새벽 3시, 조용한 편의점을 잠깐 맡아봐.',
+    summary: '진열대, 골목 고양이, 캔커피 하나. 새벽 가게의 짧은 시간.',
+    tags: ['새벽', '가게', '손님', '조용함', '짧게'],
+  },
+  'exp-magazine-editor': {
+    symbol: '📰',
+    invite: '오늘 하루 작은 동네 잡지의 편집자가 되어봐.',
+    summary: '표지 주제, 첫 페이지, 사진 분위기, 마지막 문장을 고르는 마감 날.',
+    tags: ['잡지', '편집', '사진', '글'],
+  },
+  'exp-photographer': {
+    symbol: '📷',
+    invite: '오늘만 사진작가가 되어 동네의 오후를 찍어봐.',
+    summary: '장소와 빛, 구도를 골라 상상 속 사진 한 장을 완성하는 의뢰.',
+    tags: ['사진', '빛', '동네', '짧게'],
+  },
+  'exp-observatory': {
+    symbol: '🔭',
+    invite: '언덕 위 작은 천문대에서 밤을 보내봐.',
+    summary: '관측 대상을 고르고 방문객과 이야기하며 맑은 밤을 지키는 시간.',
+    tags: ['밤', '별', '하늘', '천문대', '조용함'],
+  },
+  'exp-book-designer': {
+    symbol: '📕',
+    invite: '하루 동안 북디자이너가 되어 표지를 만들어봐.',
+    summary: '분위기, 제목 위치, 색을 골라 책 한 권의 얼굴을 정하는 시간.',
+    tags: ['책', '디자인', '표지', '색', '짧게'],
+  },
+  'exp-plant-shop': {
+    symbol: '🪴',
+    invite: '작은 식물가게를 맡아 손님에게 어울리는 화분을 골라봐.',
+    summary: '이사 온 손님, 선물을 찾는 손님. 초록을 하나씩 떠나보내는 하루.',
+    tags: ['식물', '가게', '손님', '선물'],
+  },
+  'exp-alley-bakery': {
+    symbol: '🥐',
+    invite: '골목 작은 빵집의 하루를 맡아봐.',
+    summary: '오늘의 빵을 고르고, 첫 손님과 마지막 남은 빵까지 함께하는 하루.',
+    tags: ['빵', '가게', '아침', '손님', '골목'],
+  },
+  'exp-small-stage': {
+    symbol: '🎻',
+    invite: '작은 공연장의 오늘 밤 공연을 준비해봐.',
+    summary: '의자, 조명, 관객 입장, 공연 직전의 대기실까지. 무대 뒤의 하루.',
+    tags: ['공연', '음악', '무대', '밤'],
+  },
+  'exp-city-guide': {
+    symbol: '🗺️',
+    invite: '처음 온 여행자에게 상상 속 도시를 안내해봐.',
+    summary: '시장, 공원, 골목, 야경. 어디부터 보여줄지 고르는 안내자의 하루.',
+    tags: ['여행', '도시', '안내', '바다', '산책'],
+  },
 };
 
 export const EXPERIENCE_EXPERIENCES: Experience[] = STORIES.map((story) => {

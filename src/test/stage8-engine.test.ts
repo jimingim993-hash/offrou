@@ -51,7 +51,12 @@ describe('지금 딱 하나: 후보 규칙 (기존 메타데이터만 사용)', 
       expect(e.minutes, e.id).toBeLessThanOrEqual(15);
       expect(e.supplies.length, e.id).toBeLessThanOrEqual(1);
       expect(e.cost, e.id).not.toBe('low');
-      expect(e.place, e.id).not.toBe('outside');
+      // 14단계: 밖에서 하는 건 아주 짧은 OUT(10분 이하·무료·준비물 없음)만 바로 시작 후보
+      if (e.place === 'outside') {
+        expect(e.minutes, e.id).toBeLessThanOrEqual(10);
+        expect(e.supplies, e.id).toHaveLength(0);
+        expect(e.cost ?? 'free', e.id).toBe('free');
+      }
     }
     // 여러 종류가 섞이고, EXPERIENCE 이야기도 포함된다
     expect(new Set(c.map((e) => e.categoryId)).size).toBeGreaterThanOrEqual(4);

@@ -253,10 +253,19 @@ export function pickFromPool(
 
 /**
  * 아무것도 고르지 않아도 바로 시작하기 좋은 경험인지 (기존 메타데이터로만 판단).
- * 5~15분 · 준비물 1개 이하 · 비용 없음 · 밖에 나가지 않아도 됨 · 혼자 가능(solo 미지정은 가능으로 본다)
+ * 5~15분 · 준비물 1개 이하 · 비용 없음 · 밖에 나가지 않아도 됨(아주 짧은 OUT은 예외) · 혼자 가능(solo 미지정은 가능으로 본다)
  */
 export const isQuickStart = (e: Experience) =>
-  e.minutes >= 5 && e.minutes <= 15 && e.supplies.length <= 1 && e.cost !== 'low' && e.place !== 'outside' && e.solo !== false;
+  e.minutes >= 5 &&
+  e.minutes <= 15 &&
+  e.supplies.length <= 1 &&
+  e.cost !== 'low' &&
+  (e.place !== 'outside' || isShortOut(e)) &&
+  e.solo !== false;
+
+/** 14단계: 밖에서 하는 것 중 아주 짧은 것(10분 이하·무료·준비물 없음)은 바로 시작해도 부담이 없다 */
+export const isShortOut = (e: Experience) =>
+  e.place === 'outside' && e.minutes <= 10 && e.supplies.length === 0 && (e.cost ?? 'free') === 'free';
 
 /** 지금 딱 하나 후보. 부족하면 조건을 조금씩 풀어 안전하게 채운다. */
 export function instantCandidates(pool: Experience[] = listExperiences()): Experience[] {

@@ -64,6 +64,9 @@ interface GenerateInput {
   random?: () => number;
 }
 
+/** 한 코스 안 OUT 최대 개수 */
+export const MAX_OUT_STEPS = 2;
+
 export function generateCourse({
   minutes,
   vibe,
@@ -97,6 +100,8 @@ export function generateCourse({
         (e) =>
           !steps.includes(e) &&
           total + e.minutes <= max &&
+          // OUT은 한 코스에 두 개까지 (OUT → OUT → OUT처럼 밖에서 계속 화면을 보게 하지 않는다)
+          (e.categoryId !== 'out' || steps.filter((x) => x.categoryId === 'out').length < MAX_OUT_STEPS) &&
           // 아무거나: 같은 카테고리를 연달아 두지 않는다
           (vibe !== 'any' || steps.length === 0 || e.categoryId !== steps[steps.length - 1].categoryId),
       );

@@ -1,5 +1,5 @@
 import type { CourseMinutes, CourseVibe } from '@/data/courses';
-import { STORAGE_KEYS, isObject, readJson, writeJson } from './storage';
+import { STORAGE_KEYS, isObject, readList, writeJson } from './storage';
 import type { Course } from './course';
 
 /**
@@ -48,7 +48,7 @@ const isSavedCourse = (v: unknown): v is SavedCourse =>
 
 /* ─── 진행 기록 ─── */
 
-export const getCourseRunsRaw = (): CourseRun[] => readJson<unknown[]>(STORAGE_KEYS.courseRuns, [], Array.isArray).filter(isRun);
+export const getCourseRunsRaw = (): CourseRun[] => readList(STORAGE_KEYS.courseRuns, isRun);
 
 export const replaceCourseRuns = (runs: CourseRun[]) => writeJson(STORAGE_KEYS.courseRuns, runs);
 
@@ -98,7 +98,7 @@ export function endCourseRun(runId: string, course: Course, now = new Date()) {
 /* ─── 저장한 코스 ─── */
 
 export const getSavedCoursesRaw = (): SavedCourse[] =>
-  readJson<unknown[]>(STORAGE_KEYS.savedCourses, [], Array.isArray).filter(isSavedCourse);
+  readList(STORAGE_KEYS.savedCourses, isSavedCourse);
 
 export const replaceSavedCourses = (items: SavedCourse[]) => writeJson(STORAGE_KEYS.savedCourses, items);
 

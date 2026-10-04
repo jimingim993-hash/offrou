@@ -71,5 +71,61 @@ export function validateStory(story: InteractiveStory): string[] {
   }
   if (!story.scenes.some((s) => s.isEnding)) errors.push('마지막 장면 없음');
   if (!story.endings.some((e) => !e.when?.length)) errors.push('기본 결말 없음');
+  // 13단계: 결말 id 중복, 고를 수 없는 결말 조건, 되돌아가는 고리, 닿을 수 없는 장면
+  if (new Set(story.endings.map((e) => e.id)).size !== story.endings.length) errors.push('결말 id 중복');
+  const flags = new Set(story.scenes.flatMap((s) => (s.choices ?? []).map((c) => c.flag).filter(Boolean)));
+  for (const e of story.endings) for (const f of e.when ?? []) if (!flags.has(f)) errors.push(`결말 ${e.id}: 고를 수 없는 조건 ${f}`);
+  const nextOf = (id: string) => {
+    const s = findScene(story, id);
+    return s ? [...(s.choices ?? []).map((c) => c.next), ...(s.next ? [s.next] : [])] : [];
+  };
+  const reached = new Set<string>();
+  const visiting = new Set<string>();
+  const walk = (id: string) => {
+    if (visiting.has(id)) {
+      errors.push(`되돌아가는 고리: ${id}`);
+      return;
+    }
+    if (reached.has(id) || !ids.has(id)) return;
+    visiting.add(id);
+    for (const n of nextOf(id)) walk(n);
+    visiting.delete(id);
+    reached.add(id);
+  };
+  if (ids.has(story.start)) walk(story.start);
+  for (const s of story.scenes) if (ids.has(story.start) && !reached.has(s.id)) errors.push(`닿을 수 없는 장면: ${s.id}`);
   return errors;
+}
+
+/** 여러 이야기를 한 번에 검사 (경험 id 중복 포함) */
+export function validateStories(stories: InteractiveStory[]): string[] {
+  const errors: string[] = [];
+  const seen = new Set<string>();
+  for (const s of stories) {
+    if (seen.has(s.experienceId)) errors.push(`경험 id 중복: ${s.experienceId}`);
+    seen.add(s.experienceId);
+    for (const e of validateStory(s)) errors.push(`${s.experienceId}: ${e}`);
+  }
+  return errors;
+}
+
+/**
+ * 가능한 모든 진행(장면 경로 + 고른 플래그)을 끝까지 펼친다. 테스트·검사용.
+ * 고리가 있어도 멈추도록 장면 수만큼만 따라간다.
+ */
+export function allPlaythroughs(story: InteractiveStory): StoryState[] {
+  const out: StoryState[] = [];
+  const limit = story.scenes.length + 1;
+  const go = (state: StoryState) => {
+    const scene = findScene(story, currentSceneId(state));
+    if (!scene || scene.isEnding || state.path.length > limit) {
+      out.push(state);
+      return;
+    }
+    if (scene.choices?.length) for (const c of scene.choices) go(choose(state, c));
+    else if (scene.next) go(advance(state, scene));
+    else out.push(state);
+  };
+  go(startStory(story));
+  return out;
 }

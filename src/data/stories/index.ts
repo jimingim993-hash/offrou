@@ -9,6 +9,16 @@ import { FLOWER_SHOP_STORY } from './flower-shop';
 import { NIGHT_TRAIN_STORY } from './night-train';
 import { MUSEUM_NIGHT_STORY } from './museum-night';
 import { POSTMAN_STORY } from './postman';
+import { CINEMA_STORY } from './cinema';
+import { CONVENIENCE_STORY } from './convenience';
+import { MAGAZINE_STORY } from './magazine';
+import { PHOTOGRAPHER_STORY } from './photographer';
+import { OBSERVATORY_STORY } from './observatory';
+import { BOOK_DESIGNER_STORY } from './book-designer';
+import { PLANT_SHOP_STORY } from './plant-shop';
+import { BAKERY_STORY } from './bakery';
+import { CONCERT_HALL_STORY } from './concert-hall';
+import { CITY_GUIDE_STORY } from './city-guide';
 
 /** 인터랙티브 EXPERIENCE 장면 데이터. 새 이야기는 파일을 만들고 여기에 등록한다. */
 export const STORIES: InteractiveStory[] = [
@@ -22,4 +32,14 @@ export const STORIES: InteractiveStory[] = [
   NIGHT_TRAIN_STORY,
   MUSEUM_NIGHT_STORY,
   POSTMAN_STORY,
+  CINEMA_STORY,
+  CONVENIENCE_STORY,
+  MAGAZINE_STORY,
+  PHOTOGRAPHER_STORY,
+  OBSERVATORY_STORY,
+  BOOK_DESIGNER_STORY,
+  PLANT_SHOP_STORY,
+  BAKERY_STORY,
+  CONCERT_HALL_STORY,
+  CITY_GUIDE_STORY,
 ];

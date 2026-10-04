@@ -31,7 +31,8 @@ export function RestEngine({
   const [color] = useState(() => pickOne(CALM_COLORS));
   const timer = useCountdown();
   const tone = experience.interaction?.type === 'rest' ? experience.interaction.tone : 'sky';
-  const finish = (message = program.completionMessage) => onFinish({ message });
+  // 완료 문구는 경험 데이터(doneMessage)를 기준으로 — 기존 경험과 같은 문구를 유지한다
+  const finish = (message = experience.doneMessage || program.completionMessage) => onFinish({ message });
 
   const begin = (seconds?: number) => {
     setPhase('resting');

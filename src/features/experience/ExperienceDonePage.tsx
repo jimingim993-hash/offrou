@@ -22,6 +22,7 @@ export function ExperienceDonePage() {
 
   if (!experience) return <Navigate to="/app" replace />;
   const isPlay = experience.interaction?.type === 'play';
+  const isStory = experience.interaction?.type === 'story';
 
   return (
     <div className={styles.done}>
@@ -47,6 +48,12 @@ export function ExperienceDonePage() {
         <Button block variant="ghost" onClick={() => navigate('/app/my')}>
           MY OFFROU 보기
         </Button>
+        {isStory && (
+          // 강요하지 않는 작은 선택지. 결말 수집·몇 개 발견 같은 표시는 두지 않는다
+          <Button block variant="ghost" onClick={() => navigate(playPath(experience.id))}>
+            다른 선택으로 다시 해볼래
+          </Button>
+        )}
       </div>
       {result.recordId && <FeedbackPrompt recordId={result.recordId} experience={experience} />}
     </div>

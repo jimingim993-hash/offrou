@@ -45,7 +45,7 @@ export interface Category {
 export type PlaceId = 'home' | 'anywhere' | 'outside';
 
 /** OUT 등에서 표시하는 비용 수준 */
-export type CostLevel = 'free' | 'low';
+export type CostLevel = 'free' | 'optional' | 'low';
 
 /** REST 실행 화면의 배경 분위기 */
 export type RestTone = 'sky' | 'dusk' | 'night' | 'warm';
@@ -111,7 +111,7 @@ export interface PlayPrompt {
  * - hobby: 5~15분 직접 해보는 취미 맛보기 (HOBBY, 11단계). 프로그램 데이터는 src/data/hobby
  */
 export type Interaction =
-  | { type: 'guide' }
+  | { type: 'guide'; /** 실행형 OUT 프로그램 (14단계, src/data/out). 없으면 진행 방법 목록 */ program?: string }
   | {
       type: 'rest';
       prompt: string;

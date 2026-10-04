@@ -101,6 +101,24 @@ public/          manifest.webmanifest, sw.js, icons/
 - 데이터 `src/data/rest/programs.ts`(12개), 엔진 `src/features/rest/RestEngine.tsx`. 기존 `rest` 실행 방식에 `program`이 있으면 RestEngine으로, 없으면 예전 문장+선택형 타이머 화면.
 - 타이머는 고를 때만, 끝나도·중간에 멈춰도 실패가 아니다. 효과 주장·호흡 훈련·소리 자동 재생·점수 없음. 기록 kind는 `rest` 그대로라 서버 변경이 필요 없다.
 
+## EXPERIENCE (13단계)
+
+- 이야기 20개, 데이터 `src/data/stories/` (등록은 `index.ts`, 추천용 정보는 `data/experiences/experience.ts`), 엔진 `src/features/experience/story/engine.ts`.
+- `validateStories`가 시작 장면·없는 장면 참조·막다른 장면·되돌아가는 고리·닿을 수 없는 장면·id 중복·결말 조건을 검사한다 (테스트에서 전체 검사). 잘못된 장면을 만나도 "길을 잃었어" 화면으로 안전하게 끝난다.
+
+## 실행형 OUT (14단계)
+
+- 데이터 `src/data/out/programs.ts`(26개), 엔진 `src/features/out/OutEngine.tsx`. 기존 `guide` 실행 방식에 `program`이 있으면 OutEngine으로.
+- GPS·지도·위치 권한·카메라·걸음 수를 쓰지 않고 수행 여부를 검증하지 않는다. 모든 OUT에 안전 안내와 실내 대체 활동이 있다. 지금 딱 하나에는 10분 이하·무료·준비물 없는 OUT만, 작은 코스에는 OUT이 최대 2개.
+
+## 사용자 데이터 보존 (업데이트 ≠ 초기화)
+
+- 저장 위치: 비회원·로그인 모두 이 기기의 `localStorage`(`offrou.*` 키)에 먼저 저장, 로그인 시 Supabase와 합쳐서 동기화(지우지 않고 합침). 서비스 워커 캐시는 화면 파일만 담고 사용자 데이터와 분리돼 있다.
+- 저장 구조 버전: `offrou.meta.v1`의 `storageVersion`. 구조를 바꿀 땐 `src/services/storageMigrations.ts`의 `MIGRATIONS`에 단계를 추가한다 — 메모리 사본에서 끝까지 성공해야만 저장, 실패하면 원본 그대로, 바꾼 키의 원본은 `offrou.migration-backup.v{N}`에 보관. 새 필드는 `fillDefaults`로 빈 자리만 채운다.
+- 깨진 저장값은 빈 값으로 덮어쓰기 전에 `offrou.recovery.v1`에 원본을 보관한다. 목록 일부만 깨졌으면 그 항목만 빼고 나머지는 그대로.
+- 콘텐츠 id는 바꾸지 않는다 (기록·저장이 id로 연결). 과거 기록은 당시 제목·카테고리·시간을 함께 저장하므로 콘텐츠가 사라져도 MY에 남는다.
+- 서버 마이그레이션에는 `DROP TABLE`·`TRUNCATE`·조건 없는 `DELETE`를 쓰지 않는다 (테스트로 검사).
+
 ## 개인화 (이 기기 안에서만)
 
 - 저장 키는 모두 `offrou.` 접두사 (localStorage: records · feedback · saved · activity / sessionStorage: session).

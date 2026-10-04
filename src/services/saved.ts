@@ -1,4 +1,4 @@
-import { STORAGE_KEYS, isObject, readJson, writeJson } from './storage';
+import { STORAGE_KEYS, isObject, readList, writeJson } from './storage';
 
 /**
  * "나중에 해보고 싶은" 저장한 시간.
@@ -20,7 +20,7 @@ const isItem = (v: unknown): v is SavedItem =>
 
 /** 취소 기록까지 포함한 전체 (동기화용) */
 export const getSavedRaw = (): SavedItem[] =>
-  readJson<unknown[]>(STORAGE_KEYS.saved, [], Array.isArray).filter(isItem);
+  readList(STORAGE_KEYS.saved, isItem);
 
 export const replaceSaved = (items: SavedItem[]) => writeJson(STORAGE_KEYS.saved, items);
 

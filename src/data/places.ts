@@ -8,5 +8,6 @@ export const PLACE_LABELS: Record<PlaceId, string> = {
 
 export const COST_LABELS: Record<CostLevel, string> = {
   free: '비용 없음',
+  optional: '비용은 선택',
   low: '비용 조금',
 };
