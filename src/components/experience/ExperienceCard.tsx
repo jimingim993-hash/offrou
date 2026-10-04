@@ -13,7 +13,7 @@ export function ExperienceCard({ experience: e }: { experience: Experience }) {
   const category = CATEGORIES.find((c) => c.id === e.categoryId);
   const meta = [formatMinutes(e.minutes), category?.code, PLACE_SHORT[e.place]].filter(Boolean).join(' · ');
   // OFFROU 안에서 바로 하는 실행형 놀이는 작은 표시 하나만
-  const instant = e.interaction?.type === 'play';
+  const instant = e.interaction?.type === 'play' ? '바로 놀기' : e.interaction?.type === 'hobby' ? '바로 해보기' : null;
 
   return (
     <div className={styles.wrap}>
@@ -26,7 +26,7 @@ export function ExperienceCard({ experience: e }: { experience: Experience }) {
           <span className={styles.summary}>{e.summary}</span>
           <span className={styles.meta}>
             {meta}
-            {instant && <span className={styles.instant}>바로 놀기</span>}
+            {instant && <span className={styles.instant}>{instant}</span>}
           </span>
         </span>
       </Link>

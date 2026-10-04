@@ -52,7 +52,7 @@ async function finishPlay(user: User, router: ReturnType<typeof renderAt>) {
       if (scene.isEnding) break;
       await user.click(screen.getByRole('button', { name: scene.choices?.[0].label ?? '다음' }));
     }
-  } else if (e.interaction?.type === 'play') {
+  } else if (e.interaction?.type === 'play' || e.interaction?.type === 'hobby') {
     // 실행형 PLAY는 언제든 '여기까지만 할래'로 마칠 수 있다 (프로그램별 진행은 stage10 테스트)
     await user.click(screen.getByRole('button', { name: '여기까지만 할래' }));
     return;

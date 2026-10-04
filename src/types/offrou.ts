@@ -63,6 +63,36 @@ export type PlayProgramId =
   | 'emoji-story'
   | 'sound-find';
 
+/** 실행형 REST 프로그램 id (src/data/rest/programs.ts) */
+export type RestProgramId =
+  | 'nothing-3'
+  | 'phone-down'
+  | 'window'
+  | 'one-color'
+  | 'sit'
+  | 'eyes'
+  | 'sounds'
+  | 'warm-drink'
+  | 'stretch'
+  | 'lights-down'
+  | 'bedtime'
+  | 'just-here';
+
+/** 실행형 HOBBY 프로그램 id (src/data/hobby/programs.ts) */
+export type HobbyProgramId =
+  | 'drawing'
+  | 'writing'
+  | 'photo'
+  | 'music'
+  | 'handwriting'
+  | 'paper'
+  | 'collage'
+  | 'observe-sketch'
+  | 'short-story'
+  | 'playlist'
+  | 'color-combo'
+  | 'one-card';
+
 /** PLAY 실행 화면의 한 단계: 할 일 한 문장 + 누르면 다음으로 가는 짧은 대답 */
 export interface PlayPrompt {
   /** {변수} 자리는 vars에서 하나를 골라 채운다 */
@@ -78,14 +108,24 @@ export interface PlayPrompt {
  * - focus: 오늘의 주제 하나를 건네고 바로 시작 (HOBBY)
  * - story: 장면·선택지로 진행하는 인터랙티브 이야기 (EXPERIENCE)
  * - play: OFFROU 안에서 바로 하는 실행형 놀이 (PLAY, 10단계). 프로그램 데이터는 src/data/play
+ * - hobby: 5~15분 직접 해보는 취미 맛보기 (HOBBY, 11단계). 프로그램 데이터는 src/data/hobby
  */
 export type Interaction =
   | { type: 'guide' }
-  | { type: 'rest'; prompt: string; tone: RestTone; /** 천천히 하나씩 보여줄 짧은 문장 */ lines?: string[] }
+  | {
+      type: 'rest';
+      prompt: string;
+      tone: RestTone;
+      /** 천천히 하나씩 보여줄 짧은 문장 */
+      lines?: string[];
+      /** 실행형 REST 프로그램 (12단계, src/data/rest). 없으면 문장 + 선택형 타이머 화면 */
+      program?: RestProgramId;
+    }
   | { type: 'prompts'; prompts: PlayPrompt[]; vars?: Record<string, string[]> }
   | { type: 'focus'; label: string; subjects: string[] }
   | { type: 'story'; storyId: string }
-  | { type: 'play'; program: PlayProgramId };
+  | { type: 'play'; program: PlayProgramId }
+  | { type: 'hobby'; program: HobbyProgramId };
 
 export type InteractionType = Interaction['type'];
 

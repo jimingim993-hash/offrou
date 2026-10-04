@@ -537,12 +537,12 @@ describe('접근성 · 철학', () => {
     const css = readFileSync(join(process.cwd(), 'src/features/play/play.module.css'), 'utf8');
     expect(css).toMatch(/\.canvas \{[^}]*color: var\(--color-text\)/);
     expect(css).toMatch(/\.canvas \{[^}]*background: var\(--color-bg\)/);
-    expect(readFileSync(join(process.cwd(), 'src/features/play/programs/DrawPlay.tsx'), 'utf8')).toContain('getComputedStyle(canvas).color');
+    expect(readFileSync(join(process.cwd(), 'src/features/play/DrawingCanvas.tsx'), 'utf8')).toContain('getComputedStyle(canvas).color');
   });
 
   it('카메라·마이크·위치·업로드를 쓰지 않는다', () => {
     const dir = join(process.cwd(), 'src/features/play');
-    const files = ['PlayRunner.tsx', 'parts.tsx', 'programs/DrawPlay.tsx', 'programs/PhotoPlay.tsx', 'programs/TimedLookPlay.tsx'];
+    const files = ['PlayRunner.tsx', 'parts.tsx', 'DrawingCanvas.tsx', 'programs/DrawPlay.tsx', 'programs/PhotoPlay.tsx', 'programs/TimedLookPlay.tsx'];
     for (const f of files) {
       const src = readFileSync(join(dir, f), 'utf8');
       expect(src, f).not.toMatch(/getUserMedia|geolocation|toDataURL|toBlob|fetch\(|type="file"/);

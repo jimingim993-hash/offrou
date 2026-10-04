@@ -185,8 +185,9 @@ describe('다시 경험하기', () => {
 describe('카테고리별 실행 화면', () => {
   it('REST: 문장과 선택형 타이머, 마치기', async () => {
     const user = userEvent.setup();
-    const router = renderAt('/app/experience/rest-window/play');
-    expect(screen.getByText('잠깐 창밖을 바라봐.')).toBeInTheDocument();
+    // (창밖 바라보기는 12단계에서 실행형 REST가 됐다 → 문장+선택형 타이머 화면은 천천히 숨 열 번으로 확인)
+    const router = renderAt('/app/experience/rest-ten-breaths/play');
+    expect(screen.getByText('넷에 들이쉬고, 여섯에 내쉬어.')).toBeInTheDocument();
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
 
     // 휴식 타이머는 선택형 3분 / 5분
@@ -200,7 +201,7 @@ describe('카테고리별 실행 화면', () => {
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '이 시간 마치기' }));
-    expect(router.state.location.pathname).toBe('/app/experience/rest-window/done');
+    expect(router.state.location.pathname).toBe('/app/experience/rest-ten-breaths/done');
     expect(getRecords()[0].kind).toBe('rest');
   });
 
@@ -219,13 +220,14 @@ describe('카테고리별 실행 화면', () => {
   });
 
   it('HOBBY: 오늘의 주제와 준비물을 보여주고 바로 시작', () => {
-    renderAt('/app/experience/hobby-drawing/play');
-    expect(screen.getByText('오늘 그릴 것')).toBeInTheDocument();
-    const exp = getExperience('hobby-drawing')!;
+    // (10분 드로잉은 11단계에서 실행형 HOBBY가 됐다 → "오늘의 주제" 방식은 처음 보는 단어 하나로 확인)
+    renderAt('/app/experience/hobby-new-word/play');
+    expect(screen.getByText('오늘 알아볼 것')).toBeInTheDocument();
+    const exp = getExperience('hobby-new-word')!;
     const subjects = exp.interaction?.type === 'focus' ? exp.interaction.subjects : [];
     expect(subjects.some((s) => screen.queryByText(s))).toBe(true);
-    expect(screen.getByText('준비물 · 종이 / 연필이나 펜')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /타이머 켜기 · 10분/ })).toBeInTheDocument();
+    expect(screen.getByText('준비물 · 책 또는 사전')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /타이머 켜기 · 5분/ })).toBeInTheDocument();
   });
 
   it('OUT: 예상 시간·비용·혼자 가능·준비물을 보여준다', () => {

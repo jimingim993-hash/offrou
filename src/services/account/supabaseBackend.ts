@@ -165,10 +165,10 @@ export function createSupabaseBackend(url: string, anonKey: string): AccountBack
           const opts = { onConflict: 'user_id,id', ignoreDuplicates: true };
           let completions: Record<string, unknown>[] = rows.completions.map((r) => ({ ...r }));
           let result = await supabase.from(TABLES.completions).upsert(completions, opts);
-          // 실행 방식 'play'를 모르는 서버(10단계 마이그레이션 전) → 그 기록의 kind만 비워서 다시 올린다
+          // 새 실행 방식(play·hobby)을 모르는 서버(10·11단계 마이그레이션 전) → 그 기록의 kind만 비워서 다시 올린다
           if (result.error && isKindRejected(result.error)) {
             warnMissingSchema();
-            completions = completions.map((r) => (r.kind === 'play' ? { ...r, kind: null } : r));
+            completions = completions.map((r) => (r.kind && !LEGACY_KINDS.includes(r.kind as string) ? { ...r, kind: null } : r));
             result = await supabase.from(TABLES.completions).upsert(completions, opts);
           }
           if (!result.error || !isMissingSchema(result.error)) return result;
@@ -227,6 +227,9 @@ export function isMissingSchema(error: unknown): boolean {
   if (e.code && ['42P01', 'PGRST205', '42703', 'PGRST204'].includes(e.code)) return true;
   return /relation .* does not exist|could not find the .*(table|column)/i.test(e.message ?? '');
 }
+
+/** 9단계까지의 서버가 아는 실행 방식 */
+const LEGACY_KINDS = ['guide', 'rest', 'prompts', 'focus', 'story'];
 
 /** 완료 기록의 kind 검사 제약(offrou_completions_kind_check) 위반 */
 export function isKindRejected(error: unknown): boolean {

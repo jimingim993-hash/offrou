@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 import { Orb } from '@/components/ui/Orb';
 import { OptionalTimer } from '@/components/experience/OptionalTimer';
+import { getRestProgram } from '@/data/rest/programs';
+import { RestEngine } from '@/features/rest/RestEngine';
 import type { RunnerProps } from './types';
 import styles from './runners.module.css';
 
@@ -16,6 +18,9 @@ const REST_TIMER_CHOICES = [3, 5];
 export function RestRunner({ experience, onFinish }: RunnerProps) {
   const interaction = experience.interaction?.type === 'rest' ? experience.interaction : undefined;
   const tone = interaction?.tone ?? 'sky';
+  // 12단계: 실행형 REST 프로그램이 연결돼 있으면 RestEngine으로 (없거나 잘못된 id면 아래 기본 화면)
+  const program = getRestProgram(interaction?.program);
+  if (program) return <RestEngine experience={experience} program={program} onFinish={onFinish} />;
 
   return (
     <div className={styles.rest}>

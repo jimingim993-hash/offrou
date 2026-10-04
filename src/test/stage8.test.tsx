@@ -34,7 +34,7 @@ async function completeCurrent(user: User, router: ReturnType<typeof renderAt>) 
       if (scene.isEnding) break;
       await user.click(screen.getByRole('button', { name: scene.choices?.[0].label ?? '다음' }));
     }
-  } else if (e.interaction?.type === 'play') {
+  } else if (e.interaction?.type === 'play' || e.interaction?.type === 'hobby') {
     // 실행형 PLAY는 언제든 '여기까지만 할래'로 마칠 수 있다 (프로그램별 진행은 stage10 테스트)
     await user.click(screen.getByRole('button', { name: '여기까지만 할래' }));
     return;
@@ -279,9 +279,10 @@ describe('PLAY · HOBBY · REST 실행 화면 보완', () => {
 
   it('HOBBY: 10분만 맛보기, 다른 주제', async () => {
     const user = userEvent.setup();
-    renderAt('/app/experience/hobby-drawing/play');
+    // (10분 드로잉은 11단계에서 실행형 HOBBY가 됐다 → 같은 방식은 처음 보는 단어 하나로 확인)
+    renderAt('/app/experience/hobby-new-word/play');
     expect(screen.getByText('10분만 맛보기')).toBeInTheDocument();
-    const subjects = getExperience('hobby-drawing')!.interaction as { subjects: string[] };
+    const subjects = getExperience('hobby-new-word')!.interaction as { subjects: string[] };
     const shown = () => subjects.subjects.find((s) => screen.queryByText(s));
     const before = shown();
     await user.click(screen.getByRole('button', { name: /다른 주제/ }));
@@ -289,8 +290,9 @@ describe('PLAY · HOBBY · REST 실행 화면 보완', () => {
   });
 
   it('REST: 천천히 읽는 짧은 문장, 휴대폰 내려놓기 안내, 선택형 3분/5분', () => {
-    renderAt('/app/experience/rest-window/play');
-    expect(screen.getByText('하늘의 색을 한 가지 골라봐.')).toBeInTheDocument();
+    // (창밖 바라보기는 12단계에서 실행형 REST가 됐다 → 같은 화면은 천천히 숨 열 번으로 확인)
+    renderAt('/app/experience/rest-ten-breaths/play');
+    expect(screen.getByText('들이쉬면서 하나.')).toBeInTheDocument();
     expect(screen.getByText(/휴대폰은 잠시 내려놓아도 괜찮아/)).toBeInTheDocument();
     expect(screen.getByRole('group', { name: '선택형 타이머' })).toHaveTextContent('타이머 켜기 · 3분타이머 켜기 · 5분');
     expect(screen.queryByRole('timer')).not.toBeInTheDocument(); // 켜기 전엔 없음
@@ -329,7 +331,7 @@ describe('로그인 사용자: 코스 동기화', () => {
 describe('홈페이지 한 줄 소개', () => {
   it('지금 딱 하나·작은 코스를 짧게 소개 (HERO·구조는 그대로)', async () => {
     renderAt('/');
-    await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' });
+    await screen.findByRole('heading', { level: 1, name: '같은 하루에, 다른 시간을.' }, { timeout: 8000 }); // 병렬 실행 중 첫 lazy 로딩은 1초를 넘길 수 있다
     expect(screen.getByText(/고르기도 귀찮은 날엔/)).toHaveTextContent('지금 딱 하나');
     await waitFor(() => expect(screen.getByText(/고르기도 귀찮은 날엔/)).toHaveTextContent('작은 OFFROU 코스'));
   });

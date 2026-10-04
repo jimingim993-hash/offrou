@@ -61,7 +61,7 @@ public/          manifest.webmanifest, sw.js, icons/
 로그인하지 않아도 모든 기능을 쓸 수 있다. 계정을 만들면 다른 기기에서도 기록을 이어볼 수 있다.
 
 1. [Supabase](https://supabase.com) 프로젝트를 만든다.
-2. SQL Editor에서 `supabase/migrations/`의 파일을 이름 순서대로 실행한다 (`20261003…`: 기록 테이블·RLS·계정 삭제 함수, `20261004…`: 코스, `20261005…`: 알림 구독, `20261006…`: 실행형 PLAY 기록).
+2. SQL Editor에서 `supabase/migrations/`의 파일을 이름 순서대로 실행한다 (`20261003…`: 기록 테이블·RLS·계정 삭제 함수, `20261004…`: 코스, `20261005…`: 알림 구독, `20261006…`: 실행형 PLAY 기록, `20261007…`: 실행형 HOBBY 기록).
 3. Authentication → URL Configuration: Site URL을 배포 주소로, Redirect URLs에 `<배포 주소>/app/account`, `<배포 주소>/app/account/reset` (개발: `http://localhost:5173/app/account`, `http://localhost:5173/app/account/reset`)을 추가한다. (예전 `/account…` 링크는 자동으로 `/app/account…`로 이동)
 4. `.env.example`을 `.env.local`로 복사해 `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`(공개 키)를 채운다. service_role/secret 키는 절대 넣지 않는다.
 
@@ -89,6 +89,17 @@ public/          manifest.webmanifest, sw.js, icons/
 - 공통: 타이머 `src/hooks/useCountdown.ts`(REST 타이머도 사용), 랜덤 `src/services/random.ts`.
 - 완료 기록은 기존 경험 기록(kind `play`)을 그대로 쓴다. 낙서 그림·메모·답은 저장하지 않는다. 카메라·마이크·위치를 쓰지 않는다.
 - 계정 동기화를 쓰면 `supabase/migrations/20261006…_offrou_play_kind.sql`도 실행한다 (실행 전에도 동작: 서버가 거부하면 그 기록의 kind만 비워 올림).
+
+## 실행형 HOBBY (11단계)
+
+- 데이터 `src/data/hobby/`(프로그램 12개 · 주제/문장/미션 모음), 엔진 `src/features/hobby/HobbyRunner.tsx`(소개·준비물 → 시작 → 프로그램 화면).
+- PLAY 공통 부품 재사용: 낙서 캔버스(`features/play/DrawingCanvas.tsx`), 타이머, 랜덤, 버튼·메모. 쓴 글·그림·사진은 저장·업로드하지 않는다.
+- 계정 동기화를 쓰면 `supabase/migrations/20261007…_offrou_hobby_kind.sql`도 실행한다 (실행 전에도 동작).
+
+## 실행형 REST (12단계)
+
+- 데이터 `src/data/rest/programs.ts`(12개), 엔진 `src/features/rest/RestEngine.tsx`. 기존 `rest` 실행 방식에 `program`이 있으면 RestEngine으로, 없으면 예전 문장+선택형 타이머 화면.
+- 타이머는 고를 때만, 끝나도·중간에 멈춰도 실패가 아니다. 효과 주장·호흡 훈련·소리 자동 재생·점수 없음. 기록 kind는 `rest` 그대로라 서버 변경이 필요 없다.
 
 ## 개인화 (이 기기 안에서만)
 
