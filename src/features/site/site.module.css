@@ -63,6 +63,7 @@
 }
 
 .wordmark {
+  flex: none;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -74,12 +75,6 @@
   text-decoration: none;
 }
 
-.wordmarkDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--brand-accent), var(--brand-primary));
-}
 
 .nav {
   display: none;
@@ -125,6 +120,7 @@
   font-weight: 700;
   color: var(--color-text-on-primary);
   text-decoration: none;
+  white-space: nowrap;
   background: var(--brand-primary);
   border-radius: var(--radius-pill);
 }
@@ -344,11 +340,19 @@
 }
 
 .heroBrand {
-  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
   font-size: var(--text-sm);
-  font-weight: 800;
-  letter-spacing: 0.24em;
-  color: var(--brand-primary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.heroBrandKo {
+  padding-left: var(--space-3);
+  border-left: 1.5px solid var(--color-border);
 }
 
 .heroTitle {
@@ -410,6 +414,9 @@
 }
 
 .phoneBrand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.24em;
@@ -1000,4 +1007,16 @@
 
 .howMore strong {
   color: var(--color-text);
+}
+
+/* 좁은 화면: 헤더 로고를 조금 작게 (시작 버튼이 꺾이지 않게) */
+@media (max-width: 400px) {
+  .wordmark img {
+    width: 114px;
+    height: auto;
+  }
+
+  .headerCta {
+    padding: 0 var(--space-3);
+  }
 }

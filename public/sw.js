@@ -16,7 +16,10 @@ const SHELL = '/index.html';
 const CORE = [
   SHELL,
   '/manifest.webmanifest',
-  '/icons/icon.svg',
+  '/icons/favicon-48.png',
+  '/brand/offrou-symbol.png',
+  '/brand/offrou-logo-dark.png',
+  '/brand/offrou-logo-light.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
@@ -95,7 +98,7 @@ async function cacheFirst(request, cacheName) {
 }
 
 const isStaticPath = (path) =>
-  path.startsWith('/assets/') || path.startsWith('/icons/') || path === '/manifest.webmanifest';
+  path.startsWith('/assets/') || path.startsWith('/icons/') || path.startsWith('/brand/') || path === '/manifest.webmanifest';
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { APP_BASE } from '@/app/paths';
 import { MOODS } from '@/data/moods';
 import styles from './site.module.css';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 /** 첫 화면: 워드마크 · 대표 문구 · 서비스 시작 */
 export function HeroSection() {
@@ -10,7 +11,8 @@ export function HeroSection() {
       <div className={`${styles.container} ${styles.heroInner}`}>
         <div className={styles.heroText}>
           <p className={styles.heroBrand}>
-            OFFROU <span aria-hidden="true">·</span> 오프루
+            <BrandLogo height={30} alt="OFFROU" />
+            <span className={styles.heroBrandKo}>오프루</span>
           </p>
           <h1 id="hero-title" className={styles.heroTitle}>
             같은 하루에,{' '}
@@ -36,7 +38,10 @@ export function HeroSection() {
         {/* 실제 서비스 첫 화면을 작게 보여주는 장식 (선택지는 실제 데이터) */}
         <div className={styles.heroArt} aria-hidden="true">
           <div className={styles.phone}>
-            <p className={styles.phoneBrand}>OFFROU</p>
+            <p className={styles.phoneBrand}>
+              <BrandLogo variant="symbol" height={16} decorative />
+              OFFROU
+            </p>
             <p className={styles.phoneTitle}>
               오늘도 비슷한 하루였어?
               <br />

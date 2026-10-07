@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { APP_BASE } from '@/app/paths';
 import styles from './site.module.css';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 export const SITE_NAV = [
   { href: '#service', label: '서비스' },
@@ -25,8 +26,7 @@ export function SiteHeader() {
     <header className={styles.header}>
       <div className={`${styles.container} ${styles.headerInner}`}>
         <a href="#top" className={styles.wordmark} aria-label="OFFROU 맨 위로">
-          <span className={styles.wordmarkDot} aria-hidden="true" />
-          OFFROU
+          <BrandLogo height={26} decorative />
         </a>
 
         <nav aria-label="홈페이지" className={styles.nav}>

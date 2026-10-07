@@ -311,7 +311,8 @@ describe('설치 정보 (manifest·아이콘·index.html)', () => {
     expect(pngSize('public/icons/apple-touch-icon.png')).toEqual([180, 180]);
     expect(pngSize('public/icons/favicon-32.png')).toEqual([32, 32]);
     // 임시 아이콘이라는 표시와 교체 목록
-    expect(read('public/icons/README.md')).toMatch(/임시|placeholder/);
+    // 공식 로고 기반 아이콘과 교체 안내
+    expect(read('public/icons/README.md')).toMatch(/공식 로고/);
   });
 
   it('index.html: 안전 영역(viewport-fit)·키보드·애플 아이콘·흰 화면 방지', () => {

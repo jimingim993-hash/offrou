@@ -11,6 +11,7 @@ import { buildReadyPath } from '@/features/ready/readyParams';
 import { TodayOffrou } from './TodayOffrou';
 import { Onboarding, ResumeCard } from './HomeNotices';
 import styles from './HomePage.module.css';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 /**
  * 서비스 HOME. 시작하는 방법을 네 가지로 건넨다:
@@ -34,7 +35,9 @@ export function HomePage() {
   return (
     <div className={styles.home}>
       <header className={styles.hero}>
-        <p className={styles.brand}>OFFROU</p>
+        <p className={styles.brand}>
+          <BrandLogo height={20} alt="OFFROU" />
+        </p>
         <p className={styles.lead}>
           <span>오늘도 비슷한 하루였어?</span> <span>잠깐 다른 시간으로 가볼까?</span>
         </p>

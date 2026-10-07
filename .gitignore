@@ -9,3 +9,6 @@ coverage
 .env
 .env.*
 !.env.example
+
+# Vercel 로컬 연결 정보
+.vercel

@@ -16,6 +16,8 @@
 }
 
 .brand {
+  display: flex;
+  justify-content: center;
   font-size: var(--text-xs);
   font-weight: 800;
   letter-spacing: 0.24em;

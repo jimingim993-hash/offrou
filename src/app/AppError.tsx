@@ -3,6 +3,7 @@ import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { APP_VERSION } from './version';
 import { errorCode, errorName, noteAppError } from '@/services/errorLog';
 import styles from './AppError.module.css';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 /**
  * 예상하지 못한 화면 오류가 나도 하얀 화면 대신 보이는 안내 (라우터 errorElement).
@@ -20,7 +21,9 @@ export function AppError() {
   return (
     <main className={styles.wrap}>
       <div className={styles.card} role="alert">
-        <p className={styles.brand}>OFFROU</p>
+        <p className={styles.brand}>
+          <BrandLogo height={22} alt="OFFROU" />
+        </p>
         <h1 className={styles.title}>{notFound ? '찾는 화면이 없어.' : '잠깐 문제가 생겼어.'}</h1>
         <p className={styles.text}>기록과 저장한 시간은 그대로 있어. HOME에서 다시 시작해줘.</p>
         <div className={styles.actions}>

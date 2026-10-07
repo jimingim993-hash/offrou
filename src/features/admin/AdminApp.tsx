@@ -18,6 +18,7 @@ import {
   type SupportStatus,
 } from '@/services/support/types';
 import styles from './admin.module.css';
+import { BrandLogo } from '@/components/brand/BrandLogo';
 
 type Gate = 'loading' | 'unavailable' | 'login' | 'checking' | 'forbidden' | 'ready';
 
@@ -88,7 +89,8 @@ export function AdminApp() {
     <div className={styles.admin}>
       <header className={styles.top}>
         <p className={styles.brand}>
-          OFFROU <strong>운영자</strong>
+          <BrandLogo height={20} alt="OFFROU" />
+          <strong>운영자</strong>
         </p>
         {gate === 'ready' && (
           <div className={styles.topRight}>
