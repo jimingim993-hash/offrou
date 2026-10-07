@@ -53,11 +53,11 @@
 
 ## 4. 호스팅 (Vercel)
 
-- 배포: Vercel 프로젝트  (팀 simplow), production 주소 **https://offrou.vercel.app** — 로 배포.
-- : 실제 파일이 없는 모든 경로 →  (, ,  직접 접속·새로고침 가능, 정적 파일이 먼저).
-- 캐시:  1년(immutable), ··manifest는 no-cache. 은 X-Robots-Tag noindex. HTTPS는 Vercel 기본.
+- 배포: Vercel 프로젝트 `offrou` (팀 simplow), production 주소 **https://offrou.vercel.app** — `vercel deploy --prod`로 배포.
+- `vercel.json`: 실제 파일이 없는 모든 경로 → `/index.html` (`/`, `/app/...`, `/admin` 직접 접속·새로고침 가능, 정적 파일이 먼저).
+- 캐시: `/assets/*` 1년(immutable), `/sw.js`·`/index.html`·manifest는 no-cache. `/admin`은 X-Robots-Tag noindex. HTTPS는 Vercel 기본.
 - [ ] 환경변수는 Vercel Dashboard → Project → Settings → Environment Variables (Production)에 넣고 **다시 배포**해야 반영된다 (VITE_ 변수는 빌드 때 들어간다).
-- [ ] 자체 도메인을 쓰면 Vercel에 연결한 뒤 과 Supabase Site URL·Redirect URLs를 그 도메인으로.
+- [ ] 자체 도메인을 쓰면 Vercel에 연결한 뒤 `VITE_SITE_URL`과 Supabase Site URL·Redirect URLs를 그 도메인으로.
 
 ## 5. 정책·사이트 정보 (출시 전 직접 확정 — 코드에 임의로 넣지 않았다)
 
