@@ -51,16 +51,13 @@
    - 운영자 해제: `delete from public.offrou_admins where user_id = '<UID>';`
    - 앱 코드는 누구도 자동으로 운영자로 만들지 않는다. 권한은 이 테이블과 서버 함수 `is_offrou_admin()`으로만 판단한다.
 
-## 4. 호스팅
+## 4. 호스팅 (Vercel)
 
-- 저장소에는 **호스팅 설정 파일이 없다** (Netlify·Vercel 등 어떤 곳을 쓸지 아직 정해지지 않음 → 추측해서 만들지 않았다).
-- 어디에 올리든 **SPA 되돌림(rewrite)** 이 필요하다: 실제 파일이 없는 모든 경로 → `/index.html` (200).
-  `/`, `/app`, `/app/...`, `/admin`을 직접 열거나 새로고침해도 404가 나지 않아야 한다.
-  - 예) Netlify: `public/_redirects`에 `/*  /index.html  200`
-  - 예) Vercel: `vercel.json`에 `{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }`
-  - 정적 파일(`/assets/*`, `/icons/*`, `/sw.js`, `/manifest.webmanifest`, `/robots.txt`)은 되돌림 대상에서 제외되어야 한다 (위 예시는 실제 파일을 먼저 찾는다).
-- 캐시 헤더: `/assets/*`는 오래(파일명에 해시), `/sw.js`·`/index.html`은 **캐시하지 않거나 짧게** (새 버전 감지를 위해).
-- HTTPS 필수 (서비스 워커·설치·알림은 HTTPS에서만 동작).
+- 배포: Vercel 프로젝트  (팀 simplow), production 주소 **https://offrou.vercel.app** — 로 배포.
+- : 실제 파일이 없는 모든 경로 →  (, ,  직접 접속·새로고침 가능, 정적 파일이 먼저).
+- 캐시:  1년(immutable), ··manifest는 no-cache. 은 X-Robots-Tag noindex. HTTPS는 Vercel 기본.
+- [ ] 환경변수는 Vercel Dashboard → Project → Settings → Environment Variables (Production)에 넣고 **다시 배포**해야 반영된다 (VITE_ 변수는 빌드 때 들어간다).
+- [ ] 자체 도메인을 쓰면 Vercel에 연결한 뒤 과 Supabase Site URL·Redirect URLs를 그 도메인으로.
 
 ## 5. 정책·사이트 정보 (출시 전 직접 확정 — 코드에 임의로 넣지 않았다)
 
